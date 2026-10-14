@@ -1,0 +1,6 @@
+# Copy to CIRCUITPY/settings.toml on each Pico 2 W and fill in.
+WIFI_SSID = "your-wifi-name"
+WIFI_PASSWORD = "your-wifi-password"
+# Your team's Pi. Port 8081 = reference server (while building),
+# 8080 = your team's own server (from integration onwards).
+SERVER_URL = "http://192.168.1.50:8081"

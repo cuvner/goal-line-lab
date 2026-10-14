@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal-line Lab</title>
+<!--
+  Goal-line Lab web dashboard. GIVEN FILE: students do not need to edit this.
+  The server sends it to the browser for GET /. It then polls:
+    GET /stats  (Server stage 5) -> clients, channels, events
+    GET /data   (Server stage 4) -> channels only, used if /stats is missing
+-->
+<style>
+ :root{--bg:#111;--panel:#1c1c1c;--line:#333;--text:#eee;--dim:#999;--ok:#3c3;--warn:#eb3;--bad:#e44;--accent:#4cf}
+ *{box-sizing:border-box}
+ body{margin:0;padding:16px;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text)}
+ h1{margin:0 0 4px;font-size:1.4em} h2{margin:0 0 8px;font-size:1em;color:var(--accent)}
+ #sub{color:var(--dim);margin-bottom:16px}
+ .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+ .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+ canvas{width:100%;max-width:480px;aspect-ratio:4/3;background:#000;border-radius:4px;display:block}
+ #msg{font-size:1.4em;font-weight:600;margin-bottom:8px}
+ select{background:#000;color:var(--text);border:1px solid var(--line);border-radius:4px;padding:2px 4px;margin-left:8px}
+ table{border-collapse:collapse;width:100%;font-size:.9em}
+ th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+ th{color:var(--dim);font-weight:500}
+ td.data{white-space:normal;font-family:ui-monospace,monospace;font-size:.85em;word-break:break-all}
+ .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .dim{color:var(--dim)}
+ #events div{font-family:ui-monospace,monospace;font-size:.85em;padding:2px 0}
+ #events span{color:var(--dim);margin-right:8px}
+</style></head><body>
+<h1>Goal-line Lab</h1>
+<div id="sub">connecting...</div>
+<div class="grid">
+ <div class="card"><h2>CAMERA <select id="chan" aria-label="channel to show"></select></h2><div id="msg">-</div><canvas id="c" width="320" height="240"></canvas></div>
+ <div class="card"><h2>CLIENTS</h2><table><thead><tr><th>name</th><th>ip</th><th>last seen</th><th>req/s</th><th>sends</th><th>gets</th><th>errors</th></tr></thead><tbody id="clients"></tbody></table></div>
+ <div class="card"><h2>CHANNELS</h2><table><thead><tr><th>channel</th><th>age</th><th>upd/s</th><th>updates</th><th>latest data</th></tr></thead><tbody id="channels"></tbody></table></div>
+ <div class="card"><h2>EVENTS</h2><div id="events"></div></div>
+</div>
+<script>
+const STALE = 2;
+const c = document.getElementById('c').getContext('2d');
+const chan = document.getElementById('chan');
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const cls = age => age == null ? 'dim' : age < STALE ? 'ok' : age < 5 ? 'warn' : 'bad';
+const fmtAge = a => a == null ? '-' : a < 60 ? a.toFixed(1) + 's' : a < 3600 ? Math.round(a / 60) + 'm' : Math.round(a / 3600) + 'h';
+const fmtNum = (n, d) => n == null ? '-' : d ? n.toFixed(d) : n;
+const fmtUp = s => [s / 3600, s / 60 % 60, s % 60].map(n => String(Math.floor(n)).padStart(2, '0')).join(':');
+const time = t => new Date(t * 1000).toLocaleTimeString();
+
+async function getJSON(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(path + ' -> HTTP ' + r.status);
+  return r.json();
+}
+
+// Prefer /stats (stage 5). Fall back to /data (stage 4) so a half-built server still shows something.
+async function load() {
+  try { return await getJSON('/stats'); } catch (e) {}
+  const all = await getJSON('/data');
+  return {
+    uptime: null, clients: null, events: null,
+    channels: Object.entries(all).map(([name, ch]) => ({name, age: ch.age, data: ch.data, rate: null, updates: null})),
+  };
+}
+
+function drawCamera(channels) {
+  const names = channels.map(ch => ch.name).sort();
+  if (chan.dataset.names !== names.join()) {
+    const keep = chan.value || (names.includes('ball') ? 'ball' : names[0]);
+    chan.innerHTML = names.map(n => `<option>${esc(n)}</option>`).join('');
+    chan.value = names.includes(keep) ? keep : names[0] || '';
+    chan.dataset.names = names.join();
+  }
+  const ch = channels.find(x => x.name === chan.value);
+  const online = ch && ch.age != null && ch.age < STALE;
+  const s = online && ch.data && typeof ch.data === 'object' ? ch.data : {};
+  $('msg').textContent = !ch ? 'Waiting for a channel' : !online ? 'Camera offline' : s.seen ? 'Ball detected' : 'No ball';
+  $('msg').className = !online ? 'bad' : s.seen ? 'ok' : 'warn';
+  c.clearRect(0, 0, 320, 240);
+  if (s.seen) {
+    c.strokeStyle = '#3c3'; c.lineWidth = 3;
+    c.strokeRect(s.x - s.w / 2, s.y - s.h / 2, s.w, s.h);
+  }
+}
+
+async function tick() {
+  let st;
+  try { st = await load(); }
+  catch (e) {
+    $('sub').innerHTML = '<span class="bad">No data yet: ' + esc(e.message) + '</span>';
+    return;
+  }
+  $('sub').textContent = location.host + (st.uptime != null ? '  -  up ' + fmtUp(st.uptime) : '  -  /stats not added yet (Server stage 5)');
+  drawCamera(st.channels);
+
+  $('clients').innerHTML = st.clients == null
+    ? '<tr><td colspan="7" class="dim">Needs /stats (Server stage 5)</td></tr>'
+    : st.clients.length ? st.clients.map(x =>
+      `<tr><td class="${cls(x.age)}">${esc(x.name || '?')}</td><td>${esc(x.ip)}</td><td class="${cls(x.age)}">${fmtAge(x.age)}</td>` +
+      `<td>${fmtNum(x.rate, 1)}</td><td>${x.posts}</td><td>${x.gets}</td><td class="${x.errors ? 'bad' : ''}">${x.errors}</td></tr>`).join('')
+    : '<tr><td colspan="7">no Picos have connected yet</td></tr>';
+
+  $('channels').innerHTML = st.channels.length ? st.channels.map(x =>
+    `<tr><td class="${cls(x.age)}">${esc(x.name)}</td><td class="${cls(x.age)}">${fmtAge(x.age)}</td><td>${fmtNum(x.rate, 1)}</td>` +
+    `<td>${fmtNum(x.updates)}</td><td class="data">${esc(JSON.stringify(x.data))}</td></tr>`).join('')
+    : '<tr><td colspan="5">nothing sent yet</td></tr>';
+
+  $('events').innerHTML = st.events == null
+    ? '<div class="dim">Needs /stats (Server stage 5)</div>'
+    : st.events.slice().reverse().map(([t, text]) => `<div><span>${time(t)}</span>${esc(text)}</div>`).join('') || 'no events yet';
+}
+tick();
+setInterval(tick, 500);
+</script></body></html>

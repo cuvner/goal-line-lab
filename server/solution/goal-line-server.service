@@ -1,0 +1,17 @@
+# The complete system's server on port 8080 (the teacher's demo Pi).
+# Install: sudo cp goal-line-server.service /etc/systemd/system/
+#          sudo systemctl daemon-reload && sudo systemctl enable --now goal-line-server
+[Unit]
+Description=Goal-line Lab server (port 8080)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/goal-line-lab/server/solution
+ExecStart=/usr/bin/python3 -u /home/pi/goal-line-lab/server/solution/server.py --http 8080
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
