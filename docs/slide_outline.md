@@ -13,7 +13,7 @@ Keep it short: the intro is 10 minutes, and the rest are "stay on screen" slides
 ## During the build (leave up, or switch at checkpoints)
 7. **Team card and stage 0 steps.** The three steps from team_card.md, big.
 8. **Checkpoint tracker.** The table from lesson_plan.md: where each role should be at 0:45, 1:05 and 1:25. Tick teams off on the board.
-9. **The grid** (for the Scoreboard). `grid[row][col]`, the colour numbers, and a picture of the 8×32 panel with row 0 and col 0 labelled.
+9. **The grid and the letters** (for the Scoreboard). `grid[row][col]`, the colour numbers, a picture of the 8×32 panel with row 0 and col 0 labelled, and the `G` letter next to its 7×5 list.
 10. **The blocks list** (for the Spotter). The 2D list with `x, y, width, height, id` labelled, and the 320×240 picture with (0, 0) top-left.
 11. **The address book** (for the Referee). `devices.txt` next to the 2D list it becomes, and what `who_is` should give back.
 12. **Stuck?** The "finding the broken link" table from troubleshooting.md.

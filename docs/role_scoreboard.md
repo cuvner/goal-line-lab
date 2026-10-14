@@ -1,6 +1,6 @@
 # You are the SCOREBOARD (the LED panel)
 
-You control **256 coloured lights** in a panel 8 tall and 32 wide. Your Pico asks the Referee what's happening, and your code draws it: the ball, or a big **GOAL!**
+You control **256 coloured lights** in a panel 8 tall and 32 wide. Your Pico asks the Referee what's happening, and your code lights up **GOAL** and the **score**.
 
 **Your file:** `scoreboard.py` on the scoreboard Pico (the `CIRCUITPY` drive). Open it in **Thonny**.
 **When you save it**, the Pico restarts and checks your functions. Look in Thonny's **Shell** for ✓ and ✗.
@@ -19,7 +19,7 @@ So `grid[0][0] = 3` makes the top-left light red. The code you don't need to tou
 1. The Referee tells you the Pi's IP address. Open `settings.toml` on the Pico and change the `SERVER_URL` line to `SERVER_URL = "http://<the Pi's address>:8080"`. Save it.
 2. The Pico restarts and prints **its own** address in big letters. Write it on the **team card** and give it to the Referee.
 
-## Stage 1: Make a grid and draw on it (20 min)
+## Stage 1: Make a grid and draw on it (15 min)
 **`make_grid()`** gives back 8 rows, where each row is a list of 32 zeros. Use two loops: for each of the 8 rows, make a new empty list, add 32 zeros to it, then add it to `grid`.
 
 **`draw_test(grid)`** is for fun: draw anything you like by setting numbers in the grid, such as your initials, a smiley or a flag. Loops are great for lines: `for col in range(32): grid[0][col] = 3` draws a red line along the top.
@@ -30,31 +30,43 @@ With `TEST_MODE = True`, the panel shows only your `draw_test` drawing.
 
 💡 Watch out for the "separate lists" check. `[[0] * 32] * 8` *looks* right, but it makes 8 copies of the **same** row: change one and they all change! Make a new row inside your loop.
 
-## Stage 2: Draw the ball (15 min)
-Set `TEST_MODE = False`. Now the Pico asks the Referee for the ball's position.
-
-**`draw_ball(grid, x, y)`**: the camera's picture is 320 × 240, but the panel is only 32 × 8, so you need to scale:
-```python
-col = x // 10      # 320 / 32 = 10
-row = y // 30      # 240 / 8  = 30
+## Stage 2: Your letters (20 min)
+A letter is a little 2D list: **7 rows of 5 numbers**, where `1` means lit. `G` is drawn for you:
 ```
-Then set that place in the grid to `GREEN`. Careful: `x` can be 320, which makes `col` 32, and that's off the end of the grid! If `col` is bigger than 31, make it 31. Do the same for `row` and 7.
+[0, 1, 1, 1, 0]      .###.
+[1, 0, 0, 0, 1]      #...#
+[1, 0, 0, 0, 0]      #....
+[1, 0, 1, 1, 1]  =   #.###
+[1, 0, 0, 0, 1]      #...#
+[1, 0, 0, 0, 1]      #...#
+[0, 1, 1, 1, 0]      .###.
+```
+Draw **O**, **A** and **L** by changing 0s to 1s. Sketch them on squared paper first. Make them your own style if you like!
 
-✅ **Checkpoint:** ✓ for `draw_ball`, and a green dot on the panel follows the ball.
+Then write **`draw_letter(grid, letter, top, left, colour)`**, which copies a letter onto the grid with its top-left corner at row `top`, column `left`:
+- loop over every `row` and `col` of `letter`
+- where it's a `1`, set `grid[top + row][left + col] = colour`
+- **but** only if that row is 0–7 and that column is 0–31. Otherwise skip it, so a letter can hang off the edge without crashing (you'll want this for scrolling).
 
-## Stage 3: GOAL! (15 min)
-`goal.txt` holds a picture made of characters: `#` means light on and `.` means off.
+✅ **Checkpoint:** ✓ for `letter O/A/L is drawn` and all four `draw_letter` checks.
 
-**`load_picture(filename)`**: read the file and give back a 2D list of characters, one row per line. `list(line.strip())` turns `"..##.."` into `[".", ".", "#", "#", ".", "."]`.
+## Stage 3: GOAL and the score (15 min)
+Set `TEST_MODE = False`. Now the Pico asks the Referee for the decision and the score.
 
-**`draw_picture(grid, picture, colour)`**: loop over every row and column of `picture`. Wherever it's `"#"`, set the same place in `grid` to `colour`.
+**`draw_goal(grid, score, tick)`**: draw G, O, A and L, then the score. Letters are 5 wide, so leave a 1-light gap: columns **0, 6, 12, 18** for the letters and **26** for the number. The number is `DIGITS[score % 10]` (the digits are drawn for you in `digits.py`). Choose your colours!
 
-✅ **Checkpoint:** ✓ for both, and when the Referee says GOAL, the panel flashes **GOAL!**
+**`draw_score(grid, score)`**: between goals, just show the number in the middle (column 14 or so).
 
-## Stage 4: Your own picture (10 min)
-When the camera can't see the ball, the panel shows `my_picture.txt` (a smiley). Open it in Thonny and design your own: 8 lines of 32 characters, using `#` and `.`. Save it, then unplug and replug the Pico.
+✅ **Checkpoint:** ✓ for `draw_goal` and `draw_score`, the score shows on the panel, and when the Referee says GOAL the panel says **GOAL** with the score.
+
+## Stage 4: Make it yours (as long as you like)
+`tick` goes up by 1 five times a second. Use it in `draw_goal`:
+- **Flash:** `if tick % 2 == 0:` use one colour, `else:` another.
+- **Scroll:** work out `left = 32 - (tick % 70)` and draw the letters at `left`, `left + 6`, `left + 12`, `left + 18` and the number at `left + 26`. They slide in from the right and off the left (that's why `draw_letter` skips lights that are off the panel).
+- **Rainbow:** a different colour for each letter.
+- **Two-digit scores:** `score // 10` is the tens digit and `score % 10` is the units.
+- Draw an exclamation mark `!` (it only needs 1 column wide) and add it after the L.
 
 ## More to try
-- Write `draw_goal_line(grid, line_x)`, which draws the goal line as a blue column (`col = line_x // 10`). The code already uses it if it exists!
-- Make the ball 2 × 2 lights instead of 1.
-- Design a `nogoal.txt` picture (and ask your teacher to show it).
+- Move the letters down a row (`top = 1`) to see which looks best.
+- Make `draw_score` show the number in a different colour when the score is 5 or more.

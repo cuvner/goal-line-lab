@@ -12,7 +12,7 @@ The ball's journey is: **HuskyLens → camera Pico → Wi-Fi → Referee → Wi-
 | The dashboard's CLIENTS box shows `camera` in green | the camera's `SERVER_URL`, or `devices.txt` / `who_is()` |
 | The dashboard's big word changes when the ball crosses the line | `decide()` |
 | CLIENTS shows `scoreboard` in green | the scoreboard's `SERVER_URL`, or `devices.txt` / `who_is()` |
-| The panel shows something | `make_grid`, `draw_ball` or `draw_picture` |
+| The panel shows something | `make_grid`, `draw_letter`, `draw_goal` or `draw_score` |
 
 ## Both Picos
 | What you see | Why | Fix |
@@ -39,8 +39,10 @@ The ball's journey is: **HuskyLens → camera Pico → Wi-Fi → Referee → Wi-
 |---|---|---|
 | Nothing lights up | no 5 V, no shared ground, or wrong pin | teacher: check the panel wiring |
 | `✗ make_grid's rows are separate lists` | used `[[0]*32]*8` | make a **new** row list inside the loop |
-| `IndexError: list index out of range` in `draw_ball` | `col` is 32 or `row` is 8 | cap `col` at 31 and `row` at 7 |
-| The GOAL! picture is scrambled | `load_picture` didn't strip the newline | use `list(line.strip())` |
+| `✗ letter O is drawn` | the letter is still all zeros | change some 0s to 1s (7 rows of 5) |
+| `IndexError` in `draw_letter` | a letter is hanging off the panel | only set `grid[r][c]` when `r` is 0–7 and `c` is 0–31 |
+| `IndexError` in `draw_goal` when the score reaches 10 | `DIGITS[10]` doesn't exist | use `DIGITS[score % 10]` |
+| The letters look wrong | rows and columns mixed up | `letter[row][col]` → `grid[top + row][left + col]` |
 | Nothing but a blinking blue corner | the camera isn't sending | fix the Spotter's side first |
 | Only an orange corner | can't reach the server | see "Both Picos" |
 

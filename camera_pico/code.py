@@ -99,6 +99,7 @@ husky.connect(HuskyLens.OBJECT_TRACKING)
 
 last_said = None
 last_problem = None
+failures = 0
 while True:
     try:
         blocks = [[b["x"], b["y"], b["w"], b["h"], b["id"]] for b in husky.get_blocks()]
@@ -131,10 +132,13 @@ while True:
         if last_problem:
             print("  ✓ the server is accepting the ball now")
         last_problem = None
+        failures = 0
     else:
-        problem = explain_problem(coms, "camera")
-        if problem != last_problem:
-            print(problem)
-            last_problem = problem
-        time.sleep(0.5)
+        failures += 1
+        if failures >= 3:  # one failure is just a Wi-Fi blip; three in a row is a problem
+            problem = explain_problem(coms, "camera")
+            if problem != last_problem:
+                print(problem)
+                last_problem = problem
+            time.sleep(0.5)
     time.sleep(0.1)

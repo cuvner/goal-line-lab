@@ -1,10 +1,10 @@
 # Goal-line Lab
 
-A fun, 2-hour, hands-on activity for 16-year-olds (open day friendly). Teams of three build a mini **goal-line detector**: an AI camera spots a football, a Raspberry Pi "referee" decides GOAL or NO GOAL and keeps score, and an LED panel shows it, all over Wi-Fi. A live web dashboard shows everything happening.
+A fun, 2-hour, hands-on activity for 16-year-olds (open day friendly). Teams of three build a mini **goal-line detector**: an AI camera spots a football, a Raspberry Pi "referee" decides GOAL or NO GOAL and keeps score, and an LED panel lights up GOAL and the score, all over Wi-Fi. A live web dashboard shows everything happening.
 
 ```
   SPOTTER (camera Pico)  ──▶  REFEREE (server on the Pi)  ──▶  SCOREBOARD (LED Pico)
-  HuskyLens finds the ball     who's who? goal? score?          ball, or GOAL! in lights
+  HuskyLens finds the ball     who's who? goal? score?          GOAL and the score in lights
                                         │
                                    dashboard (web page)
 ```
@@ -41,8 +41,8 @@ camera_pico/              the Spotter (CircuitPython, Pico 2 W + HuskyLens)
   code.py                 given: checks camera.py, reads the camera, sends the ball
   solution/camera.py      TEACHER ONLY
 scoreboard_pico/          the Scoreboard (CircuitPython, Pico 2 W + 8x32 NeoPixels)
-  scoreboard.py           ★ the student's file
-  goal.txt, my_picture.txt  pictures as # and . characters
+  scoreboard.py           ★ the student's file (letters as 2D lists, GOAL + score)
+  digits.py               given: the digits 0-9 as 5x7 grids
   code.py                 given: checks scoreboard.py, fetches decisions, drives the panel
   solution/scoreboard.py  TEACHER ONLY
 pico_lib/                 given: copy into CIRCUITPY/lib on both Picos

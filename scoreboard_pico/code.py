@@ -3,11 +3,10 @@
 # Gets the referee's decision from the server over Wi-Fi, then uses YOUR
 # functions in scoreboard.py to draw on the 8x32 LED panel.
 #
-#   GOAL         -> the GOAL! picture, flashing
-#   NO GOAL      -> the ball, where the camera sees it
-#   NO BALL      -> your own picture (my_picture.txt)
-#   no camera    -> your draw_test() drawing, with a blinking blue corner
-#   no server    -> an orange corner (the console says why)
+#   GOAL          -> your draw_goal()  (GOAL and the score)
+#   anything else -> your draw_score() (just the score)
+#   no camera     -> your draw_test() drawing, with a blinking blue corner
+#   no server     -> an orange corner (the Shell says why)
 
 import time
 
@@ -17,9 +16,9 @@ from pico_coms import PicoComs
 
 import scoreboard
 
-# ---- panel set-up (teacher: check these once with the chase test) ----
+# ---- panel set-up (teacher: check these once with the test pattern) ----
 PIXEL_PIN = board.GP0
-BRIGHTNESS = 0.05   # keep it low: 256 LEDs get very bright and power-hungry
+BRIGHTNESS = 0.05    # keep it low: 256 LEDs get very bright and power-hungry
 COLUMN_MAJOR = True  # the LED chain runs down the columns
 SERPENTINE = True    # ...zig-zagging: down column 0, up column 1, ...
 FLIP_X = False
@@ -66,6 +65,11 @@ def good_grid(grid):
             all(isinstance(r, list) and len(r) == COLS for r in grid))
 
 
+def good_letter(letter):
+    return (isinstance(letter, list) and len(letter) == 7 and
+            all(isinstance(r, list) and len(r) == 5 for r in letter))
+
+
 def explain_problem(coms, name):
     """Turn a failed send/get into advice a person can act on."""
     if coms.last_status == 403:
@@ -100,35 +104,54 @@ def check(what, ok, hint):
         print("     hint:", hint)
 
 
+def lit(grid, colour=None):
+    return sum(1 for r in grid for v in r if v != 0 and (colour is None or v == colour))
+
+
 def self_check():
     print("\nChecking scoreboard.py...")
     try:
         grid = scoreboard.make_grid()
         check("make_grid gives 8 rows of 32", good_grid(grid),
               "loop 8 times; each time make a row by looping 32 times")
-        if good_grid(grid):
-            check("make_grid is all zeros", all(v == 0 for r in grid for v in r), "start every LED at 0")
-            grid[0][0] = 5
-            check("make_grid's rows are separate lists", grid[1][0] == 0,
-                  "make a NEW row list inside the loop each time")
-            grid = scoreboard.make_grid()
-            scoreboard.draw_ball(grid, 160, 120)
-            check("draw_ball(160, 120) lights row 4, col 16", grid[4][16] == 1,
-                  "col = x // 10, row = y // 30, then grid[row][col] = GREEN")
-            grid = scoreboard.make_grid()
-            scoreboard.draw_ball(grid, 320, 240)
-            check("draw_ball copes with the far corner (320, 240)", grid[7][31] == 1,
-                  "if col is bigger than 31, make it 31 (and row 7)")
-        picture = scoreboard.load_picture("goal.txt")
-        check("load_picture reads 8 rows of 32", good_grid(picture),
-              "one list per line; use list(line.strip()) to split a line into characters")
-        if good_grid(picture) and good_grid(scoreboard.make_grid()):
-            grid = scoreboard.make_grid()
-            scoreboard.draw_picture(grid, picture, 2)
-            lit = sum(1 for r in grid for v in r if v == 2)
-            hashes = sum(1 for r in picture for c in r if c == "#")
-            check("draw_picture lights every #", lit == hashes and lit > 0,
-                  "two loops (rows, then columns); if picture[row][col] == '#': grid[row][col] = colour")
+        if not good_grid(grid):
+            print("  (fix make_grid first - the other checks need it)\n")
+            return
+        check("make_grid is all zeros", lit(grid) == 0, "start every LED at 0")
+        grid[0][0] = 5
+        check("make_grid's rows are separate lists", grid[1][0] == 0,
+              "make a NEW row list inside the loop each time")
+
+        for name in ("O", "A", "L"):
+            letter = getattr(scoreboard, name, None)
+            check("letter " + name + " is drawn", good_letter(letter) and lit(letter) > 0,
+                  "change some 0s to 1s in " + name + " (7 rows of 5)")
+
+        G = scoreboard.G
+        grid = scoreboard.make_grid()
+        scoreboard.draw_letter(grid, G, 0, 0, 3)
+        check("draw_letter draws G at the top-left", grid[0][1] == 3 and grid[0][0] == 0,
+              "where letter[row][col] == 1, set grid[top + row][left + col] = colour")
+        grid = scoreboard.make_grid()
+        scoreboard.draw_letter(grid, G, 1, 10, 2)
+        check("draw_letter puts it where you say (row 1, col 10)", grid[1][11] == 2,
+              "add `top` to the row and `left` to the column")
+        grid = scoreboard.make_grid()
+        scoreboard.draw_letter(grid, G, 0, 30, 1)
+        check("draw_letter copes with a letter hanging off the right edge", grid[0][31] == 1,
+              "only set grid[r][c] when r is 0-7 and c is 0-31")
+        grid = scoreboard.make_grid()
+        scoreboard.draw_letter(grid, G, 0, -3, 1)
+        check("draw_letter copes with a letter hanging off the left edge", grid[0][0] == 1,
+              "a column below 0 is off the panel too")
+
+        grid = scoreboard.make_grid()
+        scoreboard.draw_goal(grid, 3, 0)
+        check("draw_goal lights up GOAL and the score", lit(grid) > 30,
+              "call draw_letter for G, O, A, L and DIGITS[score % 10]")
+        grid = scoreboard.make_grid()
+        scoreboard.draw_score(grid, 3)
+        check("draw_score shows the number", lit(grid) > 0, "draw_letter(grid, DIGITS[score % 10], ...)")
     except Exception as e:
         print("  ✗ one of your functions crashed:", repr(e))
     print()
@@ -157,9 +180,6 @@ if getattr(scoreboard, "TEST_MODE", False):
     while True:
         time.sleep(1)
 
-goal_picture = safely("load_picture", "goal.txt")
-my_picture = safely("load_picture", "my_picture.txt")
-
 # ---- main loop: about 5 times a second ----
 
 tick = 0
@@ -187,18 +207,12 @@ while True:
         decision = "NO CAMERA"
     else:
         decision = info.get("decision")
+        score = info.get("score", 0)
         if decision == "GOAL":
-            if goal_picture:
-                safely("draw_picture", grid, goal_picture, 2 if tick % 4 < 2 else 1)
-        elif decision == "NO BALL":
-            if my_picture:
-                safely("draw_picture", grid, my_picture, 4)
+            safely("draw_goal", grid, score, tick)
         else:
-            if info.get("seen"):
-                safely("draw_ball", grid, info.get("x", 0), info.get("y", 0))
-            if hasattr(scoreboard, "draw_goal_line") and info.get("line") is not None:
-                safely("draw_goal_line", grid, int(info["line"]))
-            if decision != "NO GOAL":  # e.g. REFEREE ERROR
+            safely("draw_score", grid, score)
+            if decision not in ("NO GOAL", "NO BALL"):  # e.g. REFEREE ERROR
                 grid[0][0] = 3
 
     if decision != last_decision:

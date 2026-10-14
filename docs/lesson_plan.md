@@ -9,7 +9,7 @@ Students only write **short functions** using **loops, if-statements, 2D lists a
 |---|---|---|---|
 | **Referee** (server, on the Pi) | who's who, goal or no goal, the score, commentary | [role_referee.md](role_referee.md) | reading a file, 2D list, loops, if |
 | **Spotter** (camera Pico) | wiring, training the camera, `find_ball`, `describe` | [role_spotter.md](role_spotter.md) | loop over a 2D list, if / elif / else |
-| **Scoreboard** (LED Pico) | the grid, drawing the ball, loading and drawing a GOAL! picture | [role_scoreboard.md](role_scoreboard.md) | building a 2D list, nested loops, reading a file |
+| **Scoreboard** (LED Pico) | the grid, letters as 2D lists, lighting up GOAL and the score | [role_scoreboard.md](role_scoreboard.md) | building a 2D list, nested loops, if |
 
 Start every student on [how_it_works.md](how_it_works.md) and the [team card](team_card.md).
 
@@ -23,7 +23,7 @@ Start every student on [how_it_works.md](how_it_works.md) and the [team card](te
 
 | Time | What | Teacher | Students |
 |---|---|---|---|
-| 0:00–0:10 | **Hook** | Demo the finished system: roll the ball over the line, GOAL! flashes, score goes up. Show the diagram in how_it_works.md. One sentence per role. | Form teams of 3, choose roles. |
+| 0:00–0:10 | **Hook** | Demo the finished system: roll the ball over the line, GOAL lights up, score goes up. Show the diagram in how_it_works.md. One sentence per role. | Form teams of 3, choose roles. |
 | 0:10–0:25 | **Stage 0: addresses** | Hand out team cards. Walk round helping with `hostname -I`, `settings.toml` and `devices.txt`. | Referee finds the Pi's address → Picos put it in `settings.toml` → Picos print their addresses → Referee puts them in `devices.txt`. |
 | 0:25–1:25 | **Build** | Checkpoints at **0:45**, **1:05** and **1:25** (see table). Circulate with [troubleshooting.md](troubleshooting.md). | Work through your stages. Each one has a ✅ checkpoint. |
 | 1:25–1:45 | **Play** | Mark a real goal line with tape. Get the Spotter to read the ball's `x` on the line and the Referee to set `GOAL_LINE`. | Test it: roll the ball over the line, take the ball away, unplug the camera. Does it recover? Improve commentary and pictures. |
@@ -34,8 +34,8 @@ Start every student on [how_it_works.md](how_it_works.md) and the [team card](te
 | Checkpoint | Referee | Spotter | Scoreboard |
 |---|---|---|---|
 | 0:45 | Stage 1 done: CLIENTS shows `camera` and `scoreboard` | Stage 2 done: camera trained | Stage 1 done: drawing on the panel |
-| 1:05 | Stage 2 done: GOAL / NO GOAL on dashboard | Stage 3 done: green box follows the ball | Stage 2 done: green dot follows the ball |
-| 1:25 | Stage 3 done: score counts | Stage 4 done | Stage 3 done: GOAL! flashes |
+| 1:05 | Stage 2 done: GOAL / NO GOAL on dashboard | Stage 3 done: green box follows the ball | Stage 2 done: letters drawn, `draw_letter` works |
+| 1:25 | Stage 3 done: score counts | Stage 4 done | Stage 3 done: GOAL and the score light up |
 
 Nobody is blocked by anyone else for long: the Spotter and Scoreboard each have their own checks and test modes, and the Referee's `test_referee.py` works without the Picos. If a Referee is stuck at stage 1, the teacher can drop in `server/solution/referee.py` so the team can carry on, then let them keep working on their own copy.
 

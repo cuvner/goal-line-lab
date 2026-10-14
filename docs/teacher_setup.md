@@ -34,7 +34,7 @@ Reset for a fresh team: `git -C ~/goal-line-lab checkout -- server/referee.py se
 4. Copy `settings.toml.example` to `CIRCUITPY/settings.toml` and fill in the Wi-Fi name and password. Leave `SERVER_URL` as it is: the students change it in stage 0.
 5. Copy the role's files onto the drive root:
    - **camera Pico:** `camera_pico/code.py` and `camera_pico/camera.py`
-   - **scoreboard Pico:** `scoreboard_pico/code.py`, `scoreboard.py`, `goal.txt` and `my_picture.txt`
+   - **scoreboard Pico:** `scoreboard_pico/code.py`, `scoreboard.py` and `digits.py`
 
 Reset for a fresh team: copy `camera.py` / `scoreboard.py` from the repo over the student's version.
 

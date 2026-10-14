@@ -7,8 +7,8 @@ Real football uses **goal-line technology**: cameras watch the goal line and buz
   (camera Pico)                (the server, on the Pi)       (LED panel Pico)
 
   HuskyLens camera             "Who sent this? Is it         8 x 32 lights
-  finds the ball  ──────────▶   a goal? What's the  ──────▶  show the ball,
-                  "the ball     score?"             "GOAL!"   or GOAL!
+  finds the ball  ──────────▶   a goal? What's the  ──────▶  light up GOAL
+                  "the ball     score?"             "GOAL, 2" and the score
                    is at x=250"
                                       │
                                       ▼
@@ -20,7 +20,7 @@ Real football uses **goal-line technology**: cameras watch the goal line and buz
 |---|---|---|
 | **Spotter** | wire up the camera, teach it what a football looks like, write `find_ball()` | `camera.py` on the camera Pico |
 | **Referee** | the server's brain: who's who, goal or no goal, and the score | `referee.py` on the Raspberry Pi |
-| **Scoreboard** | draw the ball and a GOAL! picture on the LED panel | `scoreboard.py` on the scoreboard Pico |
+| **Scoreboard** | light up GOAL and the score on the LED panel | `scoreboard.py` on the scoreboard Pico |
 
 Each of you only edits **your own file**. The tricky stuff (Wi-Fi, the camera and the lights) is already done in the other files.
 
