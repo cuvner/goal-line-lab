@@ -1,42 +1,55 @@
 # Troubleshooting
 
-## Pico (both roles)
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `ImportError: no module named 'adafruit_requests'` (or `pico_coms`, `huskylens`, `neopixel`) | a library is missing from `CIRCUITPY/lib` | copy it in from the bundle or `pico_lib/` |
-| `PicoComs: connecting to ...` repeats forever | wrong Wi-Fi name or password, or a network that needs a username | check `settings.toml` spelling and quotes |
-| `Send failed: [Errno 113] ...` or `ETIMEDOUT` | wrong `SERVER_URL`, or the server isn't running | open `SERVER_URL/data/ball` in a browser on the same network |
-| `Send failed: HTTP 404` | wrong path, for example `SERVER_URL` ends in `/data` | `SERVER_URL` should only be `http://<ip>:<port>` |
-| `Send failed: HTTP 501` | the server stage isn't finished yet | use port 8081 until your server is ready |
-| An occasional `EINPROGRESS` or `Repeated socket failures` | a brief Wi-Fi hiccup | ignore it if the next request works |
-| The code doesn't restart after saving | auto-reload is off, or the file was saved somewhere else | press Ctrl+D in the serial console |
-| `settings.toml` changes are ignored | CircuitPython only reads it at start-up | Ctrl+D, or unplug and replug the Pico |
+Most problems show up as a message in Thonny's **Shell** (on the Picos) or in the dashboard's **EVENTS** box (on the Pi). Read the message first: it usually says what to do.
 
-## HuskyLens
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `RuntimeError: No pull up found on SDA or SCL` | no power to the HuskyLens, or wires on the wrong pins | check the wiring table, red to 3V3(OUT) |
-| `I2C devices found: []` | Protocol Type not set to I2C, or SDA/SCL swapped | General Settings > Protocol Type > I2C, then swap the green and blue wires |
-| `HuskyLens connect failed: no reply` | the HuskyLens is still booting | wait, because it retries by itself |
-| The HuskyLens keeps rebooting | the 3V3 pin can't supply enough current | power it from VBUS (pin 40, 5 V) instead |
-| `blocks` is always `[]` | the ball isn't learned, or it's in a different mode | Object Tracking mode, then learn the ball (stage 2) |
-| It tracks your hand or the background | Learn Enable is still on | turn Learn Enable off after training |
+## Finding the broken link
+The ball's journey is: **HuskyLens → camera Pico → Wi-Fi → Referee → Wi-Fi → scoreboard Pico → panel**. Check each hop in order:
 
-## LED panel
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Nothing lights up | no 5 V supply, no shared ground, or the wrong `PIXEL_PIN` | check the power and GND join, and the DIN pin |
-| The test pattern is scrambled | `index()` doesn't match the wiring | use `MODE = "chase"` and sketch the order |
-| Wrong colours | a GRB vs RGB panel | add `pixel_order=neopixel.RGB` to `NeoPixel(...)` |
-| `AttributeError: 'NoneType' object has no attribute 'get'` | `show()` got `None` (server unreachable) before stage 4 | that's what stage 4 fixes |
-| The panel flickers or the Pico resets | `BRIGHTNESS` too high for the supply | keep it at 0.05 |
+| Check | If not, the problem is |
+|---|---|
+| The camera Pico's Shell says `✓ HuskyLens found` | wiring or the HuskyLens's Protocol Type |
+| The Shell prints `ball: left/middle/right` with the ball in view | the camera isn't trained, or `find_ball` |
+| The dashboard's CLIENTS box shows `camera` in green | the camera's `SERVER_URL`, or `devices.txt` / `who_is()` |
+| The dashboard's big word changes when the ball crosses the line | `decide()` |
+| CLIENTS shows `scoreboard` in green | the scoreboard's `SERVER_URL`, or `devices.txt` / `who_is()` |
+| The panel shows something | `make_grid`, `draw_ball` or `draw_picture` |
 
-## Server
-| Symptom | Likely cause | Fix |
+## Both Picos
+| What you see | Why | Fix |
 |---|---|---|
-| `OSError: [Errno 98] Address already in use` | an old copy of the server is still running | close the other terminal, or `pkill -f "python3 server.py"` |
-| Changes don't take effect | the server wasn't restarted | Ctrl+C, then run it again |
-| The browser on another computer can't connect | wrong IP, the server is on the wrong port, or a firewall | `hostname -I`, check the port, then try `curl localhost:8080/` on the Pi |
-| `check_server.py` says "Can't reach" | the server isn't running, or it's on a different port | start it, or pass `--url` |
-| The dashboard says "No data yet: /data -> HTTP 501" | stage 4 isn't done yet | that's expected until stage 4 |
-| `BrokenPipeError` in the log | a client gave up before the reply was sent | harmless |
+| `PicoComs: connecting to ...` over and over | wrong Wi-Fi name or password | check `settings.toml` (watch the quotes) |
+| `Can't reach the server at ...` | wrong Pi address in `SERVER_URL`, or the server's off | check the team card; open the dashboard on the Pi |
+| `The server doesn't know this Pico yet` | its address isn't in `devices.txt`, or `who_is()` isn't finished | the Shell shows the exact line to add |
+| `ImportError: no module named ...` | a library is missing from `CIRCUITPY/lib` | teacher: copy it from the bundle or `pico_lib/` |
+| The Pico didn't restart after saving | auto-reload is off | press **Ctrl+D** in the Shell |
+| Changed `settings.toml` but nothing happened | it's only read at start-up | Ctrl+D, or unplug and replug |
+| An occasional `EINPROGRESS` | a tiny Wi-Fi hiccup | ignore it |
+
+## Spotter
+| What you see | Why | Fix |
+|---|---|---|
+| `Can't find the HuskyLens: check it has power...` | no power, or wrong pins | red → 3V3(OUT), black → GND, green → GP16, blue → GP17 |
+| `...isn't answering like a HuskyLens` | Protocol Type isn't I2C, or green/blue swapped | General Settings > Protocol Type > I2C |
+| `blocks` is always `[]` | the ball isn't learned, or the camera's in the wrong mode | Object Tracking, then learn the ball (stage 2) |
+| It follows your hand instead | Learn Enable is on | long-press the dial, turn **Learn Enable** off, save |
+| The HuskyLens keeps restarting | not enough power from 3V3 | move red to **VBUS (pin 40)** |
+
+## Scoreboard
+| What you see | Why | Fix |
+|---|---|---|
+| Nothing lights up | no 5 V, no shared ground, or wrong pin | teacher: check the panel wiring |
+| `✗ make_grid's rows are separate lists` | used `[[0]*32]*8` | make a **new** row list inside the loop |
+| `IndexError: list index out of range` in `draw_ball` | `col` is 32 or `row` is 8 | cap `col` at 31 and `row` at 7 |
+| The GOAL! picture is scrambled | `load_picture` didn't strip the newline | use `list(line.strip())` |
+| Nothing but a blinking blue corner | the camera isn't sending | fix the Spotter's side first |
+| Only an orange corner | can't reach the server | see "Both Picos" |
+
+## Referee
+| What you see | Why | Fix |
+|---|---|---|
+| EVENTS: `referee.py problem: line N: ...` | a typo or crash on that line | fix line N and save; it reloads by itself |
+| EVENTS: `turned away ...: who_is() says it's 'unknown'` | the address isn't in `devices.txt`, or `who_is()` doesn't match it | compare the address in the message with `devices.txt` |
+| CLIENTS shows `unknown (camera)` in red | same as above | same as above |
+| Big word stuck on `REFEREE ERROR` | one of your functions crashed | the EVENTS box says which line |
+| Dashboard won't load | the server isn't running | teacher: `sudo systemctl restart goal-line-server` |
+| `test_referee.py` says `referee.py has a typo on line N` | a syntax error | fix that line |

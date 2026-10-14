@@ -1,27 +1,29 @@
-# Slide outline (for building the deck)
+# Slide outline
 
-This is a suggested 18-slide deck for the 2-hour lesson. Slides 1-8 are the 15-minute intro. The rest stay on screen during the build, or come up at checkpoints. Take all facts and code from the other docs, not from memory.
+Keep it short: the intro is 10 minutes, and the rest are "stay on screen" slides. Big text, few words, lots of pictures. Take all facts from the other docs.
 
-1. **Title.** Goal-line Lab: build a networked goal-line detector in 2 hours. Show a photo or diagram of the finished system.
-2. **Hook.** Real goal-line technology (Hawk-Eye / GLT) has to decide "goal or not" in under 1 second. How do the cameras get that decision to the referee's watch? Live demo: move the ball, and the panel and dashboard follow.
-3. **The system.** A diagram of HuskyLens → camera Pico → Wi-Fi → server (Pi) → Wi-Fi → LED Pico → panel, with the browser dashboard also reading from the server. Label each arrow with its protocol (I2C, HTTP POST, HTTP GET).
-4. **Client-server.** Who starts each conversation? Clients **request** and the server **responds**. Our server never contacts a Pico first. Compare with peer-to-peer.
-5. **Anatomy of HTTP.** A real request and response for `POST /data/ball`: method, path, headers (`Content-Type`, `Content-Length`, `X-Pico-Name`), JSON body, then the status line `200 OK` and the JSON reply. Point out where TCP/IP and ports fit.
-6. **GET vs POST, status codes.** GET reads and POST writes/creates (CRUD → HTTP). The codes we use: 200, 400, 404, 413, 501.
-7. **JSON.** The `ball` message, both forms (`seen` true/false). Why JSON? It's human-readable and maps straight onto Python dicts. Compare with XML briefly.
-8. **The contract.** protocol.md as the API: the endpoints table and the staleness rule (age > 2 s means offline). "If you all follow this, you can build at the same time."
-9. **Roles.** Server / HuskyLens / LED panel, with what each one builds, its guide, and the hardware on their desk.
-10. **The reference server.** Port 8081 vs 8080: test against a working server first, then swap in your own. This is like using a stub or test double. Show how to read a URL like `http://10.x.x.x:8081/data/ball`.
-11. **Stage roadmap.** The checkpoint table (from the lesson plan), showing where each role should be at 0:40, 0:55, 1:10 and 1:25.
-12. **Checkpoint slide (reuse it).** "Stop. Test. Does your checkpoint pass? Tell your team where you are." Keep a team tracker grid visible.
-13. **Concurrency and locks.** Why the threaded server needs `with lock:`. Show a race condition in a two-thread timeline.
-14. **Robustness.** Errors that will happen (Wi-Fi drops, unplugged camera, server restart) and how each part copes. Show the LED states table.
-15. **Integration.** Switch `SERVER_URL` from 8081 to 8080, and find the broken hop using the debugging table from integration.md.
-16. **Prove it.** The three failure tests (ball removed, camera unplugged, server stopped). It should recover by itself.
-17. **Discuss.** The plenary questions from the lesson plan: decoupling, staleness detection, status codes, locks, security.
-18. **Exit question and extensions.** The exit question from the lesson plan, plus "where next": WebSockets/push vs polling, authentication tokens, HTTPS.
+## Intro (slides 1–6, 10 minutes)
+1. **Goal-line Lab.** A photo of the finished setup. "Today you build this."
+2. **The real thing.** Real goal-line technology: cameras watch the line and buzz the ref's watch in under a second. We're building a mini one.
+3. **How it works.** The diagram from how_it_works.md: Spotter → Referee → Scoreboard, plus the dashboard. One arrow at a time.
+4. **Three jobs.** Spotter (camera), Referee (the server on the Pi), Scoreboard (LED panel). One line each on what they write. "You only edit your own file. Everything else is done."
+5. **Addresses.** Every device has an IP address, like a house number. The Picos need the Pi's address, the Pi needs the Picos' addresses. Show the team card. "First job: swap addresses."
+6. **How you'll know it's working.** Thonny's Shell shows ✓ and ✗ with hints. The dashboard shows everything live. Each stage has a ✅ checkpoint.
 
-## Visual style
-- Use one diagram (slide 3) as the visual anchor, and repeat it small in the corner of later slides, with the part being discussed highlighted.
-- Show code at a readable size, at most about 12 lines per slide, taken exactly from the repo files.
-- Use the colours from the dashboard: green = OK or ball seen, amber = warning or no ball, red = offline or error, cyan = section headings.
+## During the build (leave up, or switch at checkpoints)
+7. **Team card and stage 0 steps.** The three steps from team_card.md, big.
+8. **Checkpoint tracker.** The table from lesson_plan.md: where each role should be at 0:45, 1:05 and 1:25. Tick teams off on the board.
+9. **The grid** (for the Scoreboard). `grid[row][col]`, the colour numbers, and a picture of the 8×32 panel with row 0 and col 0 labelled.
+10. **The blocks list** (for the Spotter). The 2D list with `x, y, width, height, id` labelled, and the 320×240 picture with (0, 0) top-left.
+11. **The address book** (for the Referee). `devices.txt` next to the 2D list it becomes, and what `who_is` should give back.
+12. **Stuck?** The "finding the broken link" table from troubleshooting.md.
+
+## Play and show off (slides 13–15)
+13. **Set the goal line.** Tape on the floor; Spotter reads `x` on the dashboard; Referee sets `GOAL_LINE`.
+14. **Break it!** Take the ball away. Unplug the camera. Does it recover by itself?
+15. **Quick questions.** The five plenary questions from lesson_plan.md, one at a time.
+
+## Style
+- At most 20 words of text per slide, apart from the code and table slides.
+- Code only in the three "cheat sheet" slides (9–11), copied exactly from the student files.
+- Dashboard colours: green = good, yellow = no ball, red = problem, blue = headings.

@@ -1,56 +1,58 @@
-# Teacher setup (before the lesson)
+# Teacher setup (before the day)
 
-Allow about 15 minutes per team the first time, then about 5 once you have a routine.
+Allow about 15 minutes per team the first time.
 
 ## Per team you need
-- 1 x Raspberry Pi (Raspberry Pi OS, on the school Wi-Fi, with a screen, keyboard and mouse) for the **server** student
-- 2 x Pico 2 W with CircuitPython, plus 2 computers with Thonny or Mu for the **Pico** students
-- 1 x HuskyLens v1 with its 4-pin I2C cable (students wire it in the lesson)
-- 1 x 8x32 WS2812 NeoPixel panel, already wired to the LED Pico (DIN to GP0, plus a 5 V supply of at least 2 A, with **shared ground**)
-- 1 x football (or any ball with a strong pattern or colour)
+- 1 × Raspberry Pi (Raspberry Pi OS, on the Wi-Fi, with screen, keyboard, mouse and Thonny) for the **Referee**
+- 2 × Pico 2 W with CircuitPython, and 2 laptops with **Thonny** for the **Spotter** and **Scoreboard**
+- 1 × HuskyLens with its 4-wire I2C cable (students wire it up in stage 1)
+- 1 × 8×32 WS2812 LED panel **already wired** to the scoreboard Pico: DIN → GP0, 5 V supply (2 A or more), **ground shared** with the Pico
+- a football, and tape to mark a goal line
 
 ## 1. Each team's Pi
 ```bash
 git clone https://github.com/cuvner/goal-line-lab.git ~/goal-line-lab
 ```
 ```bash
-sudo cp ~/goal-line-lab/server/solution/goal-line-reference.service /etc/systemd/system/
-sudo systemctl daemon-reload && sudo systemctl enable --now goal-line-reference
+sudo cp ~/goal-line-lab/server/goal-line-server.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now goal-line-server
 ```
-This runs the **reference server** on port **8081**, and it starts again on every boot. Check it by opening `http://<pi-ip>:8081/` from another computer, and note each Pi's IP address (`hostname -I`) on a card for the team.
+The server now runs on port 8080 and starts again on every boot. The Referee student edits `~/goal-line-lab/server/referee.py` in Thonny; the server reloads it whenever it's saved.
 
-Run a quick self-test:
-```bash
-python3 ~/goal-line-lab/tools/check_server.py --url http://localhost:8081
-```
-It should say `All checks passed!`.
+Check it: open `http://localhost:8080/` in the Pi's browser. You should see the dashboard with "Waiting for the camera".
 
-> The repo is public and includes `solution/` folders. If you don't want the server student to find `server/solution/server.py` on the Pi, delete that folder after installing the service. The service only needs that file, so copy it somewhere else first and edit `ExecStart` in the service file to match.
+Reset for a fresh team: `git -C ~/goal-line-lab checkout -- server/referee.py server/devices.txt server/commentary.txt`
+
+> `server/solution/referee.py` is the finished version. Keep it for yourself, or delete that folder from the Pi if you don't want students finding it.
 
 ## 2. Each Pico 2 W
 1. Flash the **Raspberry Pi Pico 2 W** CircuitPython UF2 (10.x) from circuitpython.org.
 2. From the matching Adafruit CircuitPython **bundle**, copy into `CIRCUITPY/lib`:
    - both Picos: `adafruit_requests.mpy`, `adafruit_connection_manager.mpy`
-   - LED Pico: also `neopixel.mpy` and `adafruit_pixelbuf.mpy`
-3. Copy **everything in `pico_lib/`** into `CIRCUITPY/lib` (`pico_coms.py`, `huskylens.py`).
-4. Copy `settings.toml.example` to `CIRCUITPY/settings.toml`, then fill in the Wi-Fi name and password, and `SERVER_URL = "http://<team-pi-ip>:8081"`.
-5. Leave `code.py` blank. Students copy in the starter files themselves.
+   - scoreboard Pico: also `neopixel.mpy` and `adafruit_pixelbuf.mpy`
+3. Copy **both files in `pico_lib/`** (`pico_coms.py`, `huskylens.py`) into `CIRCUITPY/lib`.
+4. Copy `settings.toml.example` to `CIRCUITPY/settings.toml` and fill in the Wi-Fi name and password. Leave `SERVER_URL` as it is: the students change it in stage 0.
+5. Copy the role's files onto the drive root:
+   - **camera Pico:** `camera_pico/code.py` and `camera_pico/camera.py`
+   - **scoreboard Pico:** `scoreboard_pico/code.py`, `scoreboard.py`, `goal.txt` and `my_picture.txt`
 
-## 3. Check each LED panel (do this once)
-Copy `led_pico/solution/code.py` onto the LED Pico with `MODE = "test_pattern"`. You should see a red top row, a blue left column and a green bottom-right pixel. If you don't:
-- **Nothing lights up:** check DIN is on `PIXEL_PIN` (GP0), the 5 V supply is on, and its ground is joined to the Pico's GND.
-- **The pattern is wrong:** this panel isn't wired in the column zig-zag the solution assumes. That's fine, because students work it out with `MODE = "chase"`, but make a note of the layout so you can help them.
+Reset for a fresh team: copy `camera.py` / `scoreboard.py` from the repo over the student's version.
+
+## 3. Check each LED panel (once)
+Copy `scoreboard_pico/solution/scoreboard.py` onto a scoreboard Pico as `scoreboard.py`, with `TEST_MODE = True`. You should see a red border on the panel. If it's scrambled or nothing lights up:
+- **Nothing:** check the 5 V supply, the shared ground, and that DIN is on GP0.
+- **Scrambled:** the panel's LEDs run in a different order. In `scoreboard_pico/code.py`, try changing `SERPENTINE`, `COLUMN_MAJOR`, `FLIP_X` or `FLIP_Y` until the border is right. Do this on every scoreboard Pico.
 
 ## 4. Network
-- The Pico 2 W can only join **WPA2/WPA3-Personal** networks (name + password), not ones that need a username.
-- Devices must be able to reach each other. Some school networks block this (client isolation). To check, open `http://<pi-ip>:8081/` from a student computer.
-- Pi IP addresses can change after a reboot. Check them on the day, or ask IT to reserve them.
+- Picos can only join **WPA2/WPA3-Personal** Wi-Fi (name + password), not networks that need a username. If the school Wi-Fi needs a username, use a phone hotspot per team.
+- Devices must be able to see each other. Check by opening `http://<pi-ip>:8080/` from a laptop.
+- Pi addresses can change after a reboot. Students find them fresh on the day, so that's fine.
 
-## 5. Your demo system (for the hook)
-Your own Pi runs the complete system on port 8080 as `goal-line-server.service`, with the solution code on both Picos. Open its dashboard on the projector.
+## 5. Your demo system
+Put the solution files on one full set (the `solution/` versions of `referee.py`, `camera.py` and `scoreboard.py`, with the real addresses in `devices.txt`) for the hook demo and as a spare. Put its dashboard on the projector.
 
-## On the day: quick checks
-- [ ] Each team's `http://<pi-ip>:8081/` loads
-- [ ] Each Pico shows `CIRCUITPY` and has `lib/pico_coms.py` and `settings.toml`
-- [ ] HuskyLens units charged/powered, with I2C cables and balls on the desks
-- [ ] LED panel power supplies switched on
+## On the day
+- [ ] Each Pi: dashboard loads at `http://localhost:8080/`, Thonny opens `referee.py`
+- [ ] Each Pico: has `lib/pico_coms.py`, `settings.toml`, and the role's files
+- [ ] HuskyLens units powered, with cables; balls, tape and team cards on desks
+- [ ] LED panel supplies switched on

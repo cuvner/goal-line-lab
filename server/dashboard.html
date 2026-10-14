@@ -2,10 +2,9 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Goal-line Lab</title>
 <!--
-  Goal-line Lab web dashboard. GIVEN FILE: students do not need to edit this.
-  The server sends it to the browser for GET /. It then polls:
-    GET /stats  (Server stage 5) -> clients, channels, events
-    GET /data   (Server stage 4) -> channels only, used if /stats is missing
+  Goal-line Lab web dashboard. GIVEN: students don't need to edit this.
+  The server sends it to the browser for GET /, and it then asks the
+  server for GET /stats twice a second.
 -->
 <style>
  :root{--bg:#111;--panel:#1c1c1c;--line:#333;--text:#eee;--dim:#999;--ok:#3c3;--warn:#eb3;--bad:#e44;--accent:#4cf}
@@ -23,12 +22,17 @@
  th{color:var(--dim);font-weight:500}
  td.data{white-space:normal;font-family:ui-monospace,monospace;font-size:.85em;word-break:break-all}
  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .dim{color:var(--dim)}
+ .wide{grid-column:1/-1}
+ #decision{font-size:clamp(2.2em,9vw,4.5em);font-weight:800;letter-spacing:.04em;line-height:1.1}
+ #score{font-size:1.4em;font-weight:600;margin-top:4px}
+ #commentary{font-size:1.2em;font-style:italic;color:var(--dim);min-height:1.4em;margin-top:6px}
  #events div{font-family:ui-monospace,monospace;font-size:.85em;padding:2px 0}
  #events span{color:var(--dim);margin-right:8px}
 </style></head><body>
 <h1>Goal-line Lab</h1>
 <div id="sub">connecting...</div>
 <div class="grid">
+ <div class="card wide"><h2>REFEREE</h2><div id="decision" class="dim">-</div><div id="score"></div><div id="commentary"></div></div>
  <div class="card"><h2>CAMERA <select id="chan" aria-label="channel to show"></select></h2><div id="msg">-</div><canvas id="c" width="320" height="240"></canvas></div>
  <div class="card"><h2>CLIENTS</h2><table><thead><tr><th>name</th><th>ip</th><th>last seen</th><th>req/s</th><th>sends</th><th>gets</th><th>errors</th></tr></thead><tbody id="clients"></tbody></table></div>
  <div class="card"><h2>CHANNELS</h2><table><thead><tr><th>channel</th><th>age</th><th>upd/s</th><th>updates</th><th>latest data</th></tr></thead><tbody id="channels"></tbody></table></div>
@@ -76,10 +80,29 @@ function drawCamera(channels) {
   $('msg').textContent = !ch ? 'Waiting for a channel' : !online ? 'Camera offline' : s.seen ? 'Ball detected' : 'No ball';
   $('msg').className = !online ? 'bad' : s.seen ? 'ok' : 'warn';
   c.clearRect(0, 0, 320, 240);
+  const ref = channels.find(x => x.name === 'referee');
+  if (ref && ref.data && typeof ref.data.line === 'number') {
+    c.strokeStyle = '#48f'; c.lineWidth = 2; c.setLineDash([6, 4]);
+    c.beginPath(); c.moveTo(ref.data.line, 0); c.lineTo(ref.data.line, 240); c.stroke();
+    c.setLineDash([]); c.fillStyle = '#48f'; c.font = '12px system-ui';
+    c.fillText('goal line', Math.min(ref.data.line + 4, 262), 14);
+  }
   if (s.seen) {
     c.strokeStyle = '#3c3'; c.lineWidth = 3;
     c.strokeRect(s.x - s.w / 2, s.y - s.h / 2, s.w, s.h);
   }
+}
+
+function drawReferee(channels) {
+  const ref = channels.find(x => x.name === 'referee');
+  const d = ref && ref.data;
+  const fresh = ref && ref.age != null && ref.age < STALE;
+  const decision = !d ? 'Waiting for the camera' : !fresh ? 'Camera offline' : d.decision;
+  $('decision').textContent = decision;
+  $('decision').className = decision === 'GOAL' ? 'ok' : decision === 'NO GOAL' ? 'warn'
+    : decision === 'REFEREE ERROR' || decision === 'Camera offline' ? 'bad' : 'dim';
+  $('score').textContent = d ? 'Goals: ' + d.score : '';
+  $('commentary').textContent = d && fresh ? d.commentary : '';
 }
 
 async function tick() {
@@ -89,13 +112,14 @@ async function tick() {
     $('sub').innerHTML = '<span class="bad">No data yet: ' + esc(e.message) + '</span>';
     return;
   }
-  $('sub').textContent = location.host + (st.uptime != null ? '  -  up ' + fmtUp(st.uptime) : '  -  /stats not added yet (Server stage 5)');
+  $('sub').textContent = location.host + (st.uptime != null ? '  -  up ' + fmtUp(st.uptime) : '');
+  drawReferee(st.channels);
   drawCamera(st.channels);
 
   $('clients').innerHTML = st.clients == null
-    ? '<tr><td colspan="7" class="dim">Needs /stats (Server stage 5)</td></tr>'
+    ? '<tr><td colspan="7" class="dim">not available</td></tr>'
     : st.clients.length ? st.clients.map(x =>
-      `<tr><td class="${cls(x.age)}">${esc(x.name || '?')}</td><td>${esc(x.ip)}</td><td class="${cls(x.age)}">${fmtAge(x.age)}</td>` +
+      `<tr><td class="${x.name.startsWith('unknown') ? 'bad' : cls(x.age)}">${esc(x.name || '?')}</td><td>${esc(x.ip)}</td><td class="${cls(x.age)}">${fmtAge(x.age)}</td>` +
       `<td>${fmtNum(x.rate, 1)}</td><td>${x.posts}</td><td>${x.gets}</td><td class="${x.errors ? 'bad' : ''}">${x.errors}</td></tr>`).join('')
     : '<tr><td colspan="7">no Picos have connected yet</td></tr>';
 
@@ -105,7 +129,7 @@ async function tick() {
     : '<tr><td colspan="5">nothing sent yet</td></tr>';
 
   $('events').innerHTML = st.events == null
-    ? '<div class="dim">Needs /stats (Server stage 5)</div>'
+    ? '<div class="dim">not available</div>'
     : st.events.slice().reverse().map(([t, text]) => `<div><span>${time(t)}</span>${esc(text)}</div>`).join('') || 'no events yet';
 }
 tick();

@@ -1,0 +1,9 @@
+GOAL|What a strike!
+GOAL|It's in the back of the net!
+GOAL|GOOOOOAAAAL!
+GOAL|The keeper had no chance!
+NO GOAL|Just wide of the line!
+NO GOAL|So close!
+NO GOAL|The ball is in play.
+NO BALL|Where's the ball gone?
+NO BALL|Someone fetch the ball!

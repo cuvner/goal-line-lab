@@ -11,6 +11,8 @@
 #   coms.send("ball", {"seen": True, "x": 160})   # True if the server got it
 #   data = coms.get("ball")                        # dict, or None if unreachable
 #   coms.age                                       # seconds since "ball" was last sent
+#   coms.ip                                        # this Pico's own IP address
+#   coms.last_status                               # e.g. 403 if the server turned us away
 
 import os
 import ssl
@@ -30,6 +32,7 @@ class PicoComs:
         self.timeout = timeout
         self.age = None         # age in seconds of the data from the last get()
         self.last_error = None  # text of the last failure, None after a success
+        self.last_status = None  # HTTP status of the last reply, e.g. 200 or 403
         self._session = None
 
     @property
@@ -61,6 +64,16 @@ class PicoComs:
             print("PicoComs: connected, IP", self.ip)
         return True
 
+    def announce(self, name):
+        """Print this Pico's IP address in big letters for the students."""
+        line = "=" * 46
+        print("\n" + line)
+        print("  This Pico (" + name + ") has the IP address:")
+        print("\n      " + str(self.ip) + "\n")
+        print("  Write it down and give it to the Server person.")
+        print("  The server will be at:", self.server_url)
+        print(line + "\n")
+
     def send(self, channel, data):
         """Send any JSON-able value to a channel on the server."""
         return self._request("POST", channel, data) is not None
@@ -86,11 +99,14 @@ class PicoComs:
             with self._session.request(
                 method, url, json=data, headers=headers, timeout=self.timeout
             ) as response:
+                self.last_status = response.status_code
                 if response.status_code != 200:
                     raise OSError("HTTP " + str(response.status_code))
                 reply = response.json()
             self.last_error = None
             return reply
         except Exception as e:  # network errors must never crash the caller
+            if not str(e).startswith("HTTP "):
+                self.last_status = None
             self.last_error = str(e)
             return None

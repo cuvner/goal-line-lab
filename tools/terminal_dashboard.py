@@ -4,7 +4,7 @@
 Shows every Pico client, every channel and recent events, updated live.
 
 Run on the Pi:   python3 terminal_dashboard.py
-From a laptop:   ssh -t pi@<pi-ip> python3 goal-line-lab/server/solution/terminal_dashboard.py
+From a laptop:   ssh -t pi@<pi-ip> python3 goal-line-lab/tools/terminal_dashboard.py
 Other server:    python3 terminal_dashboard.py --url http://<pi-ip>:8081
 
 Keys: q quit

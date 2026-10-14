@@ -1,66 +1,71 @@
 # Goal-line Lab
 
-A 2-hour A Level Computer Science practical. Teams of three build a **networked goal-line detector**. An AI camera spots a football, a Pico 2 W sends its position over Wi-Fi to a Python server on a Raspberry Pi, and a second Pico 2 W shows it on an LED panel. A live web dashboard shows every message in between.
+A fun, 2-hour, hands-on activity for 16-year-olds (open day friendly). Teams of three build a mini **goal-line detector**: an AI camera spots a football, a Raspberry Pi "referee" decides GOAL or NO GOAL and keeps score, and an LED panel shows it, all over Wi-Fi. A live web dashboard shows everything happening.
 
 ```
-HuskyLens ──I2C──▶ Pico 2 W ──HTTP POST──▶ Raspberry Pi server ◀──HTTP GET── Pico 2 W ──▶ 8x32 LED panel
- (camera)        (camera client)    /data/ball     (port 8080)      /data/ball  (display client)
-                                                        ▲
-                                              browser dashboard (GET /stats)
+  SPOTTER (camera Pico)  ──▶  REFEREE (server on the Pi)  ──▶  SCOREBOARD (LED Pico)
+  HuskyLens finds the ball     who's who? goal? score?          ball, or GOAL! in lights
+                                        │
+                                   dashboard (web page)
 ```
 
-Topics covered: client-server, HTTP (methods, status codes, headers), JSON, IP addresses and ports, APIs/REST, concurrency and locks, I2C, testing with stubs, and robustness.
+Students only write **short functions** using loops, if-statements, 2D lists and reading a text file. All the networking and hardware code is given, and every function they write is checked automatically with ✓/✗ and a hint.
 
-## For the lesson
-| Start here | |
+## Start here
+| | |
 |---|---|
-| [docs/lesson_plan.md](docs/lesson_plan.md) | objectives, timings, checkpoint table, plenary |
-| [docs/protocol.md](docs/protocol.md) | **the contract** between the three roles |
-| [docs/role_server.md](docs/role_server.md) | Server student's staged guide |
-| [docs/role_huskylens.md](docs/role_huskylens.md) | HuskyLens student's staged guide |
-| [docs/role_led_panel.md](docs/role_led_panel.md) | LED panel student's staged guide |
-| [docs/integration.md](docs/integration.md) | putting the team's system together, and debugging |
-| [docs/teacher_setup.md](docs/teacher_setup.md) | what to prepare before the lesson |
-| [docs/troubleshooting.md](docs/troubleshooting.md) | symptoms, causes, fixes |
-| [docs/slide_outline.md](docs/slide_outline.md) | suggested slide deck structure |
+| [docs/how_it_works.md](docs/how_it_works.md) | the plain-English explanation for everyone |
+| [docs/team_card.md](docs/team_card.md) | the IP-address swap at the start (print one per team) |
+| [docs/role_referee.md](docs/role_referee.md) | the Referee's stages (server, on the Pi) |
+| [docs/role_spotter.md](docs/role_spotter.md) | the Spotter's stages (camera Pico) |
+| [docs/role_scoreboard.md](docs/role_scoreboard.md) | the Scoreboard's stages (LED Pico) |
+| [docs/lesson_plan.md](docs/lesson_plan.md) | timings, checkpoints, plenary questions |
+| [docs/teacher_setup.md](docs/teacher_setup.md) | what to prepare beforehand |
+| [docs/troubleshooting.md](docs/troubleshooting.md) | what the messages mean and what to do |
+| [docs/slide_outline.md](docs/slide_outline.md) | suggested slides |
 | [CLAUDE_PROJECT_INSTRUCTIONS.md](CLAUDE_PROJECT_INSTRUCTIONS.md) | for making slides and worksheets with a Claude Project |
 
-## What's in the repo
+## What's where
 ```
-server/
-  dashboard.html          given: the live web dashboard the server sends to browsers
-  server.py               STARTER for the Server student (TODOs by stage)
-  solution/               complete server, terminal dashboard, systemd services
-huskylens_pico/
-  i2c_scan.py             given: stage 1 wiring check
-  code.py                 STARTER for the HuskyLens student
-  solution/code.py
-led_pico/
-  code.py                 STARTER for the LED panel student (chase / test_pattern / fake_ball / server modes)
-  solution/code.py, solution/onboard_test.py
+server/                   the Referee (runs on the Raspberry Pi, normal Python 3)
+  referee.py              ★ the student's file
+  devices.txt             the address book the student fills in
+  commentary.txt          comments for the student's commentary()
+  test_referee.py         checks the student's functions (✓/✗)
+  server.py               given: the server; reloads referee.py when it's saved
+  dashboard.html          given: the live web page
+  goal-line-server.service  runs the server on boot
+  solution/referee.py     TEACHER ONLY
+camera_pico/              the Spotter (CircuitPython, Pico 2 W + HuskyLens)
+  camera.py               ★ the student's file
+  code.py                 given: checks camera.py, reads the camera, sends the ball
+  solution/camera.py      TEACHER ONLY
+scoreboard_pico/          the Scoreboard (CircuitPython, Pico 2 W + 8x32 NeoPixels)
+  scoreboard.py           ★ the student's file
+  goal.txt, my_picture.txt  pictures as # and . characters
+  code.py                 given: checks scoreboard.py, fetches decisions, drives the panel
+  solution/scoreboard.py  TEACHER ONLY
 pico_lib/                 given: copy into CIRCUITPY/lib on both Picos
-  pico_coms.py            PicoComs, a general-purpose Wi-Fi client class for the protocol
-  huskylens.py            HuskyLens v1 I2C driver
+  pico_coms.py            PicoComs: Wi-Fi + talking to the server
+  huskylens.py            HuskyLens driver
 tools/
-  check_server.py         automated stage-by-stage tests for the server
-  fake_camera.py          pretends to be the camera Pico (a bouncing ball)
-settings.toml.example     Wi-Fi details and SERVER_URL for each Pico
+  fake_camera.py          pretends to be the camera (a bouncing ball) for testing
+  terminal_dashboard.py   the dashboard in a terminal
+settings.toml.example     Wi-Fi details + the Pi's address, for each Pico
 ```
 
 ## Hardware (per team)
-- Raspberry Pi (runs the student's server on port 8080 and the reference server on port 8081)
-- 2 x Raspberry Pi Pico 2 W with CircuitPython 10.x
-- DFRobot HuskyLens v1, on I2C: SDA to GP16, SCL to GP17
-- 8x32 WS2812 NeoPixel panel: DIN to GP0, with its own 5 V supply and shared ground
-- A football
+- Raspberry Pi with screen, keyboard and Thonny
+- 2 × Raspberry Pi Pico 2 W with CircuitPython 10.x, and 2 laptops with Thonny
+- DFRobot HuskyLens v1 (green → GP16, blue → GP17, black → GND, red → 3V3)
+- 8×32 WS2812 NeoPixel panel (DIN → GP0, its own 5 V supply, shared ground)
+- a football
 
-## Quick test of the complete system
+## Try the server on any computer
 ```bash
-python3 server/solution/server.py
+python3 server/server.py
 ```
 ```bash
 python3 tools/fake_camera.py
 ```
-Open http://localhost:8080/: a ball should bounce around the dashboard.
-
-> **Solutions are included** in the `solution/` folders so the repo works as a teacher's reference. Remove them from student copies if needed.
+Open http://localhost:8080/. Copy `server/solution/referee.py` over `server/referee.py` and put `camera,127.0.0.1` in `server/devices.txt` to see decisions and goals.

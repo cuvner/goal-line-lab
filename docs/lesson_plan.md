@@ -1,62 +1,52 @@
-# Lesson plan: Goal-line Lab (2 hours, A Level Computer Science)
+# Lesson plan: Goal-line Lab (2 hours, open day)
 
-## Overview
-Teams of three build a small networked **goal-line detector**. A camera client reports the football's position to a server, a display client shows it on an LED panel, and a web dashboard watches all the traffic. Each student owns one part, and the three parts must work together through an agreed **protocol** ([protocol.md](protocol.md)).
+## What it is
+A fun, hands-on **proof of concept**, not a test. Teams of three 16-year-olds build a mini goal-line detector: an AI camera spots a football, a Raspberry Pi "referee" decides GOAL or NO GOAL, and an LED panel shows it, all talking over Wi-Fi. Visitors can kick (or roll) the ball and watch the scoreboard.
 
-| Role | Builds | Guide |
-|---|---|---|
-| Server | a Python HTTP server on the Raspberry Pi | [role_server.md](role_server.md) |
-| HuskyLens | a camera client on a Pico 2 W (I2C in, HTTP POST out) | [role_huskylens.md](role_huskylens.md) |
-| LED panel | a display client on a Pico 2 W (HTTP GET in, NeoPixels out) | [role_led_panel.md](role_led_panel.md) |
+Students only write **short functions** using **loops, if-statements, 2D lists and reading text files**. All the networking and hardware code is given, and every function they write is checked automatically with ✓/✗ and a hint.
 
-The teacher provides the web dashboard (`server/dashboard.html`), the Pico libraries (`pico_lib/`), and a **reference server** on every team's Pi on port 8081. The reference server means the two client students aren't blocked waiting for the server student.
+| Role | Builds | Guide | Python they use |
+|---|---|---|---|
+| **Referee** (server, on the Pi) | who's who, goal or no goal, the score, commentary | [role_referee.md](role_referee.md) | reading a file, 2D list, loops, if |
+| **Spotter** (camera Pico) | wiring, training the camera, `find_ball`, `describe` | [role_spotter.md](role_spotter.md) | loop over a 2D list, if / elif / else |
+| **Scoreboard** (LED Pico) | the grid, drawing the ball, loading and drawing a GOAL! picture | [role_scoreboard.md](role_scoreboard.md) | building a 2D list, nested loops, reading a file |
 
-## Learning objectives
-By the end, students can:
-1. Explain the **client-server model** using a system they built, including who starts each exchange and why.
-2. Describe the parts of an **HTTP request and response** (method, path, headers, body, status code) and use **GET** and **POST** correctly.
-3. Represent and exchange structured data as **JSON**.
-4. Use **IP addresses and ports** to address a service on a network.
-5. Explain how a **shared specification (API)** lets a team develop in parallel, and test against it with stubs and test tools.
-6. Make networked software **robust**: handling errors, timeouts and stale data, and detecting failure.
+Start every student on [how_it_works.md](how_it_works.md) and the [team card](team_card.md).
 
-## Specification links
-- **Networking:** the client-server model, protocols, the TCP/IP stack (HTTP at the application layer, TCP at the transport layer, IP at the network layer), IP addresses, ports and sockets.
-- **Web technologies:** HTTP methods and status codes, APIs, JSON (and how it compares with XML), the REST style of mapping CRUD to HTTP methods (POST = create/update, GET = read).
-- **Software development:** decomposition, abstraction (PicoComs and the HuskyLens driver hide details), testing (`check_server.py` is an automated test, `fake_camera.py` is a stub), and concurrency (the threaded server needs a lock).
-- **Hardware and other:** I2C as a serial bus with addressed devices, coordinate scaling, and data representation (bytes, checksums and little-endian numbers in the HuskyLens protocol, as an extension).
+## What they'll get out of it
+- A real **client-server** system they built: "the Pi is the server, the Picos are clients".
+- What an **IP address** is for, found hands-on by swapping addresses on the team card so the right data gets to the right device.
+- Functions, loops, selection, 2D lists and file reading **doing something physical**.
+- Working as a team to a shared plan where each part depends on the others.
 
 ## Timings
 
-| Time | Phase | Teacher | Students |
+| Time | What | Teacher | Students |
 |---|---|---|---|
-| 0:00-0:15 | **Hook and big picture** | Demo the finished system: move the ball, and the panel and dashboard follow. Show the diagram in protocol.md. Explain client vs server, HTTP GET/POST, JSON and polling. Show the protocol as a "contract". | Form teams and choose roles. |
-| 0:15-0:25 | **Set-up** | Hand out Pi IPs. Check the reference server works on each Pi (`http://<pi>:8081/`). | Open your role guide. Server: open a terminal on the Pi. Picos: open Thonny/Mu, check the `CIRCUITPY` drive and `settings.toml`. |
-| 0:25-1:25 | **Build in stages** | Call a **checkpoint every 15 min** (0:40, 0:55, 1:10, 1:25) and tick off stages on the board below. Circulate. Use the troubleshooting guide. | Work through your stages. Test at each checkpoint before moving on. |
-| 1:25-1:45 | **Integration** | Teams switch to their own server ([integration.md](integration.md)). Model the debugging method: find the broken hop. | Connect, test, and prove it recovers from failures. |
-| 1:45-2:00 | **Plenary** | 1-minute demo per team. Discussion questions (below). Exit question. | Demo, then answer the team questions in integration.md. |
+| 0:00–0:10 | **Hook** | Demo the finished system: roll the ball over the line, GOAL! flashes, score goes up. Show the diagram in how_it_works.md. One sentence per role. | Form teams of 3, choose roles. |
+| 0:10–0:25 | **Stage 0: addresses** | Hand out team cards. Walk round helping with `hostname -I`, `settings.toml` and `devices.txt`. | Referee finds the Pi's address → Picos put it in `settings.toml` → Picos print their addresses → Referee puts them in `devices.txt`. |
+| 0:25–1:25 | **Build** | Checkpoints at **0:45**, **1:05** and **1:25** (see table). Circulate with [troubleshooting.md](troubleshooting.md). | Work through your stages. Each one has a ✅ checkpoint. |
+| 1:25–1:45 | **Play** | Mark a real goal line with tape. Get the Spotter to read the ball's `x` on the line and the Referee to set `GOAL_LINE`. | Test it: roll the ball over the line, take the ball away, unplug the camera. Does it recover? Improve commentary and pictures. |
+| 1:45–2:00 | **Show off** | Each team demos to the others (1 min). Quick questions below. | Demo. Leave it running for visitors. |
 
-### Target stage by checkpoint
+### Where each role should be at each checkpoint
 
-| Checkpoint | Server | HuskyLens | LED panel |
+| Checkpoint | Referee | Spotter | Scoreboard |
 |---|---|---|---|
-| 0:40 | 1 (page) done | 1 (wired, 0x32 found) done | 1 in progress |
-| 0:55 | 2 (GET) and 3 (POST) under way | 2 (trained) and 3 (reading) done | 1 (index) done, 2 under way |
-| 1:10 | 3 done, 4 under way | 4 (sending) done | 2 (drawing) done, 3 under way |
-| 1:25 | 4 done, 5 optional | 5 (robust) done | 3 and 4 done |
+| 0:45 | Stage 1 done: CLIENTS shows `camera` and `scoreboard` | Stage 2 done: camera trained | Stage 1 done: drawing on the panel |
+| 1:05 | Stage 2 done: GOAL / NO GOAL on dashboard | Stage 3 done: green box follows the ball | Stage 2 done: green dot follows the ball |
+| 1:25 | Stage 3 done: score counts | Stage 4 done | Stage 3 done: GOAL! flashes |
 
-Fast finishers do the extensions at the end of each role guide. Struggling students use the `<details>` hints. For the most stuck, the teacher can show the matching part of the `solution/` file.
+Nobody is blocked by anyone else for long: the Spotter and Scoreboard each have their own checks and test modes, and the Referee's `test_referee.py` works without the Picos. If a Referee is stuck at stage 1, the teacher can drop in `server/solution/referee.py` so the team can carry on, then let them keep working on their own copy.
 
-## Differentiation
-- **Support:** every stage has a checkpoint and a hint. The server role has a self-check tool, and both Pico roles have test modes (`i2c_scan.py`, `MODE = "chase"`/`"test_pattern"`/`"fake_ball"`). Pair a weaker student with the HuskyLens role: it's the most hands-on, and its code is the shortest.
-- **Stretch:** server stage 5 (`/stats`), hardening (body size limits), the HuskyLens bandwidth/heartbeat extension, LED text scrolling, the goal-line decision channel, and reading the HuskyLens byte protocol.
+## Quick questions for the plenary (plain answers)
+1. **Which device is the server?** The Pi. The Picos are clients: they start every conversation, and the Pi just answers.
+2. **Why did we swap IP addresses?** So the Picos know where to send messages, and so the server knows who's who. It only takes the ball from the camera and only gives the decision to the scoreboard.
+3. **How does the scoreboard know the camera's unplugged?** The server remembers *when* the last ball message arrived. If it's over 2 seconds old, everyone treats the camera as offline.
+4. **Why count a goal only when the previous decision wasn't GOAL?** The ball stays over the line for a while, and the camera reports it 10 times a second. Without that check, one goal would count as 50.
+5. **What could go wrong on a real network?** Anyone could pretend to be the camera, so real systems use passwords and encryption, not just addresses.
 
-## Plenary questions (with model answers)
-1. **Why does the LED panel ask the server, rather than the camera telling the panel directly?** The server decouples them: either side can restart or be replaced, and more displays or loggers can be added without changing the camera. The cost is an extra hop (latency) and a single point of failure.
-2. **How does the LED panel know the camera is offline when nobody tells it?** The server timestamps each update. The client compares the `age` with a 2-second threshold, so a missing heartbeat counts as a failure.
-3. **What does the 400 status tell a client, compared with 404 and 501?** 400 means the request was malformed, 404 means there's no such resource, and 501 means the server hasn't implemented it yet. Clients can react differently to each.
-4. **Why did the server need a lock?** Requests are handled by several threads at once. Without a lock, a read could see a half-updated shared dictionary, or two writes could race.
-5. **Name a security weakness and a fix.** Anyone can POST fake data (no authentication), so add a shared secret or token header. A client could also flood the server or send huge bodies, so add rate limits and size limits (413). Traffic is plain HTTP and can be read on the network, so use HTTPS/TLS.
-
-## Exit question
-*"Explain, using HTTP, JSON and the client-server model, how a ball moving in front of the camera ends up lit on the LED panel."* Look for: the camera client POSTs JSON to the server; the server stores it with a timestamp; the display client polls with GET; the server replies with the data and its age; the client scales the coordinates and lights the LEDs.
+## If things go wrong on the day
+- A Pico won't join the Wi-Fi: use the teacher's phone hotspot for the whole team (Pi and both Picos).
+- The camera won't train: use a brightly coloured ball and a plain background.
+- Running short on time: skip Referee stage 4, Spotter stage 4 and Scoreboard stage 4. The system works without them.
