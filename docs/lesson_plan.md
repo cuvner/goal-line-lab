@@ -42,7 +42,7 @@ Nobody is blocked by anyone else for long: the Spotter and Scoreboard each have 
 ## Quick questions for the plenary (plain answers)
 1. **Which device is the server?** The Pi. The Picos are clients: they start every conversation, and the Pi just answers.
 2. **Why did we swap IP addresses?** So the Picos know where to send messages, and so the server knows who's who. It only takes the ball from the camera and only gives the decision to the scoreboard.
-3. **How does the scoreboard know the camera's unplugged?** The server remembers *when* the last ball message arrived. If it's over 2 seconds old, everyone treats the camera as offline.
+3. **How does the scoreboard know the camera's unplugged?** The server remembers *when* the last ball message arrived. If it's over 4 seconds old, everyone treats the camera as offline.
 4. **Why count a goal only when the previous decision wasn't GOAL?** The ball stays over the line for a while, and the camera reports it 10 times a second. Without that check, one goal would count as 50.
 5. **What could go wrong on a real network?** Anyone could pretend to be the camera, so real systems use passwords and encryption, not just addresses.
 

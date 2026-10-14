@@ -23,7 +23,7 @@ The ball's journey is: **HuskyLens → camera Pico → Wi-Fi → Referee → Wi-
 | `ImportError: no module named ...` | a library is missing from `CIRCUITPY/lib` | teacher: copy it from the bundle or `pico_lib/` |
 | The Pico didn't restart after saving | auto-reload is off | press **Ctrl+D** in the Shell |
 | Changed `settings.toml` but nothing happened | it's only read at start-up | Ctrl+D, or unplug and replug |
-| An occasional `EINPROGRESS` | a tiny Wi-Fi hiccup | ignore it |
+| An occasional `EINPROGRESS` or a brief `NO CAMERA` | a Wi-Fi dropout (school Wi-Fi loses packets in short bursts) | ignore it; it recovers by itself |
 
 ## Spotter
 | What you see | Why | Fix |

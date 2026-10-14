@@ -27,7 +27,7 @@ FLIP_Y = False
 ROWS, COLS = 8, 32
 COLOURS = {0: (0, 0, 0), 1: (0, 255, 0), 2: (255, 180, 0), 3: (255, 0, 0),
            4: (0, 0, 255), 5: (255, 255, 255)}
-STALE_AFTER = 2.0  # seconds without camera data = camera offline
+STALE_AFTER = 4.0  # seconds without camera data = camera offline (school Wi-Fi has short dropouts)
 
 pixels = neopixel.NeoPixel(PIXEL_PIN, ROWS * COLS, brightness=BRIGHTNESS, auto_write=False)
 

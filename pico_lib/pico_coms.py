@@ -46,6 +46,11 @@ class PicoComs:
     def connect(self, attempts=None, retry_delay=3):
         """Join the Wi-Fi. attempts=None keeps trying forever.
         Returns True once connected."""
+        try:  # stop the Pico W's Wi-Fi dozing off, which causes multi-second stalls
+            import cyw43
+            cyw43.set_power_management(cyw43.PM_NONE)
+        except (ImportError, AttributeError):
+            pass
         tries = 0
         while not wifi.radio.connected:
             if attempts is not None and tries >= attempts:

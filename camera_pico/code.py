@@ -140,5 +140,4 @@ while True:
             if problem != last_problem:
                 print(problem)
                 last_problem = problem
-            time.sleep(0.5)
     time.sleep(0.1)
