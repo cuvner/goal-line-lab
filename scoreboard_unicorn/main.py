@@ -13,6 +13,9 @@
 
 import time
 
+print("Scoreboard starting in 3 seconds... (press Ctrl-C in the Shell to stop it)")
+time.sleep(3)
+
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN
 from pico_coms import PicoComs
