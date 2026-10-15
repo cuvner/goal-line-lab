@@ -3,7 +3,7 @@
 A fun, 2-hour, hands-on activity for 16-year-olds (open day friendly). Teams of three build a mini **goal-line detector**: an AI camera spots a football, a Raspberry Pi "referee" decides GOAL or NO GOAL and keeps score, and an LED panel lights up GOAL and the score, all over Wi-Fi. A live web dashboard shows everything happening.
 
 ```
-  SPOTTER (camera Pico)  ──▶  REFEREE (server on the Pi)  ──▶  SCOREBOARD (LED Pico)
+  SPOTTER (camera Pico)  ──▶  REFEREE (server on the Pi)  ──▶  SCOREBOARD (LED panel)
   HuskyLens finds the ball     who's who? goal? score?          GOAL and the score in lights
                                         │
                                    dashboard (web page)
@@ -18,7 +18,7 @@ Students only write **short functions** using loops, if-statements, 2D lists and
 | [docs/team_card.md](docs/team_card.md) | the IP-address swap at the start (print one per team) |
 | [docs/role_referee.md](docs/role_referee.md) | the Referee's stages (server, on the Pi) |
 | [docs/role_spotter.md](docs/role_spotter.md) | the Spotter's stages (camera Pico) |
-| [docs/role_scoreboard.md](docs/role_scoreboard.md) | the Scoreboard's stages (LED Pico) |
+| [docs/role_scoreboard.md](docs/role_scoreboard.md) | the Scoreboard's stages (NeoPixel panel or Cosmic Unicorn) |
 | [docs/lesson_plan.md](docs/lesson_plan.md) | timings, checkpoints, plenary questions |
 | [docs/teacher_setup.md](docs/teacher_setup.md) | what to prepare beforehand |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | what the messages mean and what to do |
