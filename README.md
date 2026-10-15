@@ -60,7 +60,7 @@ settings.toml.example     Wi-Fi details + the Pi's address, for each Pico
 
 ## Hardware (per team)
 - Raspberry Pi with screen, keyboard and Thonny
-- 2 × Raspberry Pi Pico 2 W with CircuitPython 10.x, and 2 laptops with Thonny
+- 2 × Raspberry Pi Pico 2 W with CircuitPython 10.x, and 2 laptops with Thonny (one Pico is replaced by the Cosmic Unicorn if you use that)
 - DFRobot HuskyLens v1 (green → GP16, blue → GP17, black → GND, red → 3V3)
 - 8×32 WS2812 NeoPixel panel (DIN → GP0, its own 5 V supply, shared ground), **or** a Pimoroni Cosmic Unicorn (32×32)
 - a football

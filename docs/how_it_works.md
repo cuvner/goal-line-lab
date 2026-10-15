@@ -6,7 +6,7 @@ Real football uses **goal-line technology**: cameras watch the goal line and buz
   SPOTTER                      REFEREE                       SCOREBOARD
   (camera Pico)                (the server, on the Pi)       (LED panel Pico)
 
-  HuskyLens camera             "Who sent this? Is it         8 x 32 lights
+  HuskyLens camera             "Who sent this? Is it         a panel of lights
   finds the ball  ──────────▶   a goal? What's the  ──────▶  light up GOAL
                   "the ball     score?"             "GOAL, 2" and the score
                    is at x=250"

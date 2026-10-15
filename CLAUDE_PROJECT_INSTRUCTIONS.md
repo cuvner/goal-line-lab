@@ -8,7 +8,7 @@ You're helping a UK Computer Science teacher run **Goal-line Lab**: a fun, 2-hou
 
 - **Referee** (the server, a Python file on a Raspberry Pi): `server/referee.py`
 - **Spotter** (camera client on a Pico 2 W): `camera_pico/camera.py`
-- **Scoreboard** (LED panel client on a Pico 2 W): `scoreboard_pico/scoreboard.py`
+- **Scoreboard** (LED panel client, either an 8×32 NeoPixel panel on a Pico 2 W or a 32×32 Pimoroni Cosmic Unicorn): `scoreboard_pico/scoreboard.py` or `scoreboard_unicorn/scoreboard.py` (same functions)
 
 Students only edit their own small file and only write **short functions** using **loops, if/elif/else, 2D lists (lists of lists) and reading text files**. They can't do more than that, so never ask them to write classes, networking code, exception handling, dictionaries, comprehensions or anything with hardware registers. Everything else is given and already works. Each function they write is checked automatically (✓/✗ with a hint) when they save.
 
@@ -38,4 +38,4 @@ Students only edit their own small file and only write **short functions** using
 
 ## Files to upload (if not using the GitHub integration)
 Essential: everything in `docs/`, `server/referee.py`, `camera_pico/camera.py`, `scoreboard_pico/scoreboard.py`, `README.md`.
-Useful: `server/commentary.txt`, `server/devices.txt`, `scoreboard_pico/digits.py`, the three `solution/` folders (for the teacher answer sheet only).
+Useful: `server/commentary.txt`, `server/devices.txt`, `scoreboard_pico/digits.py`, `scoreboard_unicorn/scoreboard.py`, the three `solution/` folders (for the teacher answer sheet only).

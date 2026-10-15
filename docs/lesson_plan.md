@@ -9,7 +9,7 @@ Students only write **short functions** using **loops, if-statements, 2D lists a
 |---|---|---|---|
 | **Referee** (server, on the Pi) | who's who, goal or no goal, the score, commentary | [role_referee.md](role_referee.md) | reading a file, 2D list, loops, if |
 | **Spotter** (camera Pico) | wiring, training the camera, `find_ball`, `describe` | [role_spotter.md](role_spotter.md) | loop over a 2D list, if / elif / else |
-| **Scoreboard** (LED Pico) | the grid, letters as 2D lists, lighting up GOAL and the score | [role_scoreboard.md](role_scoreboard.md) | building a 2D list, nested loops, if |
+| **Scoreboard** (LED Pico or Cosmic Unicorn) | the grid, letters as 2D lists, lighting up GOAL and the score | [role_scoreboard.md](role_scoreboard.md) | building a 2D list, nested loops, if |
 
 Start every student on [how_it_works.md](how_it_works.md) and the [team card](team_card.md).
 

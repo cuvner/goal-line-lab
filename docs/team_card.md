@@ -6,7 +6,7 @@
 |---|---|---|---|
 | **Referee** (Raspberry Pi) | | `____.____.____.____` | on the Pi, open a Terminal and type `hostname -I` (the first number) |
 | **Spotter** (camera Pico) | | `____.____.____.____` | printed in big letters when the Pico starts |
-| **Scoreboard** (LED Pico) | | `____.____.____.____` | printed in big letters when the Pico starts |
+| **Scoreboard** (LED Pico or Cosmic Unicorn) | | `____.____.____.____` | printed in big letters when the board starts |
 
 ### Step 1: Referee → Picos
 Give the Pi's address to both Pico people. In `settings.toml` on **each** Pico, change the server line to:
