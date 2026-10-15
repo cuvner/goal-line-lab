@@ -38,6 +38,16 @@ Reset for a fresh team: `git -C ~/goal-line-lab checkout -- server/referee.py se
 
 Reset for a fresh team: copy `camera.py` / `scoreboard.py` from the repo over the student's version.
 
+## 2b. Cosmic Unicorn instead of a NeoPixel Pico
+A Pimoroni Cosmic Unicorn (32×32, runs Pimoroni MicroPython) can be a team's scoreboard instead. It has its own Wi-Fi and runs `main.py` whenever it has power, so it doesn't need to stay plugged into the Pi. Install `mpremote` on the Pi or a laptop (`pip3 install --user --break-system-packages mpremote`), plug the board in by USB, then:
+```bash
+cp scoreboard_unicorn/settings.py.example /tmp/settings.py   # then fill it in
+```
+```bash
+mpremote cp scoreboard_unicorn/main.py scoreboard_unicorn/pico_coms.py scoreboard_unicorn/digits.py scoreboard_unicorn/scoreboard.py /tmp/settings.py :
+```
+Reset for a fresh team: `mpremote cp scoreboard_unicorn/scoreboard.py :`. The board's own console (for the ✓/✗ and the IP banner) is in Thonny with *MicroPython (Raspberry Pi Pico)* selected, or `mpremote repl`.
+
 ## 3. Check each LED panel (once)
 Copy `scoreboard_pico/solution/scoreboard.py` onto a scoreboard Pico as `scoreboard.py`, with `TEST_MODE = True`. You should see a red border on the panel. If it's scrambled or nothing lights up:
 - **Nothing:** check the 5 V supply, the shared ground, and that DIN is on GP0.

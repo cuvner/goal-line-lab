@@ -45,6 +45,10 @@ scoreboard_pico/          the Scoreboard (CircuitPython, Pico 2 W + 8x32 NeoPixe
   digits.py               given: the digits 0-9 as 5x7 grids
   code.py                 given: checks scoreboard.py, fetches decisions, drives the panel
   solution/scoreboard.py  TEACHER ONLY
+scoreboard_unicorn/       the Scoreboard on a Pimoroni Cosmic Unicorn (32x32, MicroPython) instead
+  scoreboard.py           ★ the student's file (same functions, 32 rows)
+  main.py, pico_coms.py, digits.py, settings.py.example   given
+  solution/scoreboard.py  TEACHER ONLY
 pico_lib/                 given: copy into CIRCUITPY/lib on both Picos
   pico_coms.py            PicoComs: Wi-Fi + talking to the server
   huskylens.py            HuskyLens driver
@@ -58,7 +62,7 @@ settings.toml.example     Wi-Fi details + the Pi's address, for each Pico
 - Raspberry Pi with screen, keyboard and Thonny
 - 2 × Raspberry Pi Pico 2 W with CircuitPython 10.x, and 2 laptops with Thonny
 - DFRobot HuskyLens v1 (green → GP16, blue → GP17, black → GND, red → 3V3)
-- 8×32 WS2812 NeoPixel panel (DIN → GP0, its own 5 V supply, shared ground)
+- 8×32 WS2812 NeoPixel panel (DIN → GP0, its own 5 V supply, shared ground), **or** a Pimoroni Cosmic Unicorn (32×32)
 - a football
 
 ## Try the server on any computer

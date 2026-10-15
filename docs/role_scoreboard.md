@@ -5,6 +5,8 @@ You control **256 coloured lights** in a panel 8 tall and 32 wide. Your Pico ask
 **Your file:** `scoreboard.py` on the scoreboard Pico (the `CIRCUITPY` drive). Open it in **Thonny**.
 **When you save it**, the Pico restarts and checks your functions. Look in Thonny's **Shell** for ✓ and ✗.
 
+> **Got a Cosmic Unicorn (the square 32×32 one)?** Same file, same functions, with three differences: `ROWS` and `COLS` are both **32**; your files live **on the board itself** (in Thonny pick *MicroPython (Raspberry Pi Pico)* at the bottom right, then open `scoreboard.py` from the device, and press the board's reset button after saving); and the Pi's address goes in **`settings.py`** instead of `settings.toml`. The bottom 7 rows scroll the Referee's commentary for you.
+
 ## The grid
 You draw with a **2D list** of numbers called `grid`, with one number per light:
 ```
@@ -53,7 +55,7 @@ Then write **`draw_letter(grid, letter, top, left, colour)`**, which copies a le
 ## Stage 3: GOAL and the score (15 min)
 Set `TEST_MODE = False`. Now the Pico asks the Referee for the decision and the score.
 
-**`draw_goal(grid, score, tick)`**: draw G, O, A and L, then the score. Letters are 5 wide, so leave a 1-light gap: columns **0, 6, 12, 18** for the letters and **26** for the number. The number is `DIGITS[score % 10]` (the digits are drawn for you in `digits.py`). Choose your colours!
+**`draw_goal(grid, score, tick)`**: draw G, O, A and L, then the score. Letters are 5 wide, so leave a 1-light gap: columns **0, 6, 12, 18** for the letters and **26** for the number (on the Cosmic Unicorn: row 3, columns **4, 10, 16, 22**, with the number below at row 13, column 14). The number is `DIGITS[score % 10]` (the digits are drawn for you in `digits.py`). Choose your colours!
 
 **`draw_score(grid, score)`**: between goals, just show the number in the middle (column 14 or so).
 

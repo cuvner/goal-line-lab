@@ -1,0 +1,5 @@
+# Copy to settings.py on the Cosmic Unicorn and fill in.
+WIFI_SSID = "your-wifi-name"
+WIFI_PASSWORD = "your-wifi-password"
+# The Referee (your team's Raspberry Pi). Ask the Referee for the address.
+SERVER_URL = "http://192.168.1.50:8080"

@@ -26,7 +26,7 @@ Students only edit their own small file and only write **short functions** using
 - **Never include solution code** from any `solution/` folder in student materials. Hints are fine. Full answers go only in teacher materials, marked **TEACHER ONLY**.
 - Keep to the timings in `docs/lesson_plan.md`. If something won't fit, say so.
 
-**Facts to use without changing:** HuskyLens green → GP16, blue → GP17, black → GND, red → 3V3; the camera picture is 320 wide × 240 tall with (0, 0) top-left; the panel is 8 rows × 32 columns, `grid[row][col]`, colours 0 off / 1 green / 2 yellow / 3 red / 4 blue / 5 white; letters are 2D lists of 7 rows × 5 columns of 0/1 (G is given, students draw O, A, L; digits come from `digits.py`); the scoreboard shows only GOAL and the score, never the ball; the server is on port 8080; the dashboard is `http://<Pi's IP>:8080/`; data counts as stale after 4 seconds; decisions are exactly `"GOAL"`, `"NO GOAL"`, `"NO BALL"`.
+**Facts to use without changing:** HuskyLens green → GP16, blue → GP17, black → GND, red → 3V3; the camera picture is 320 wide × 240 tall with (0, 0) top-left; the panel is 8 rows × 32 columns (or 32 × 32 on a Cosmic Unicorn, whose bottom 7 rows scroll the commentary), `grid[row][col]`, colours 0 off / 1 green / 2 yellow / 3 red / 4 blue / 5 white; letters are 2D lists of 7 rows × 5 columns of 0/1 (G is given, students draw O, A, L; digits come from `digits.py`); the scoreboard shows only GOAL and the score, never the ball; the server is on port 8080; the dashboard is `http://<Pi's IP>:8080/`; data counts as stale after 4 seconds; decisions are exactly `"GOAL"`, `"NO GOAL"`, `"NO BALL"`.
 
 **Things the teacher is likely to ask for:**
 - the slide deck in `docs/slide_outline.md`, with short speaker notes

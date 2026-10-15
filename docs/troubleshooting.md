@@ -45,6 +45,8 @@ The ball's journey is: **HuskyLens → camera Pico → Wi-Fi → Referee → Wi-
 | The letters look wrong | rows and columns mixed up | `letter[row][col]` → `grid[top + row][left + col]` |
 | Nothing but a blinking blue corner | the camera isn't sending | fix the Spotter's side first |
 | Only an orange corner | can't reach the server | see "Both Picos" |
+| **Cosmic Unicorn:** nothing changes after saving | MicroPython only runs `main.py` at start-up | press the board's reset button, or unplug and replug |
+| **Cosmic Unicorn:** `ImportError: no module named 'settings'` | `settings.py` isn't on the board | teacher: copy it with `mpremote` (see teacher_setup.md) |
 
 ## Referee
 | What you see | Why | Fix |
