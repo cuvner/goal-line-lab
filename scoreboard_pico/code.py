@@ -185,9 +185,20 @@ if getattr(scoreboard, "TEST_MODE", False):
 tick = 0
 last_decision = None
 last_problem = None
+info = None
+age = None
+fails = 0
 while True:
     tick += 1
-    info = coms.get("referee")
+    got = coms.get("referee")
+    if got is not None:
+        info, age, fails = got, coms.age, 0
+    else:
+        fails += 1
+        if fails >= 3 or info is None:  # three misses in a row: really can't reach it
+            info, age = None, None
+        elif age is not None:
+            age += 0.25  # one Wi-Fi blip: keep showing the last decision for now
     problem = explain_problem(coms, "scoreboard") if info is None else None
     if problem != last_problem:
         print(problem if problem else "  ✓ getting decisions from the server now")
@@ -200,7 +211,7 @@ while True:
     if info is None:  # can't reach the server
         grid[0][0] = 2
         decision = "NO SERVER"
-    elif coms.age is None or coms.age > STALE_AFTER:  # camera not sending
+    elif age is None or age > STALE_AFTER:  # camera not sending
         safely("draw_test", grid)
         if tick % 2:
             grid[0][0] = 4
