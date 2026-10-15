@@ -353,13 +353,23 @@ class Handler(BaseHTTPRequestHandler):
         pass  # the Picos send several messages a second; keep the console quiet
 
 
+class QuietServer(ThreadingHTTPServer):
+    def handle_error(self, request, client_address):
+        """A Pico dropping a connection mid-request (Wi-Fi blip) isn't worth a traceback."""
+        import sys
+        error = sys.exc_info()[1]
+        if isinstance(error, (ConnectionResetError, BrokenPipeError, TimeoutError)):
+            return
+        super().handle_error(request, client_address)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--http", type=int, default=8080, help="port")
     args = parser.parse_args()
     os.chdir(HERE)  # so referee.py can open devices.txt and commentary.txt
     who_is("127.0.0.1")  # load referee.py and devices.txt now
-    server = ThreadingHTTPServer(("0.0.0.0", args.http), Handler)
+    server = QuietServer(("0.0.0.0", args.http), Handler)
     print(f"Goal-line Lab server on port {args.http}. Find the Pi's address with: hostname -I")
     server.serve_forever()
 
