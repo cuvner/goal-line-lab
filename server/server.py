@@ -40,6 +40,7 @@ DEVICES_FILE = os.path.join(HERE, "devices.txt")
 CHANNEL = re.compile(r"^/data/([A-Za-z0-9_-]{1,32})$")
 MAX_BODY = 4096
 GOAL_SHOW_SECONDS = 3.0  # how long GOAL stays on the dashboard and scoreboard after a goal
+MAX_SCORE = 9            # the goal after this takes the score back to 0 (the panels show one digit)
 # Who may send to / read from which channel (who_is() decides who's who)
 SEND_ONLY = {"ball": "camera"}
 READ_ONLY = {"referee": "scoreboard"}
@@ -190,6 +191,8 @@ class Referee:
                     self.commentary = self.module.commentary(decision, score)
                 if score > self.score:
                     self.goal_time = time.time()
+                    if score > MAX_SCORE:
+                        score = 0
                 self.score = score
                 self.raw_decision = decision
                 # Show GOAL for a few seconds, then go back to the score even if the ball stays over the line
