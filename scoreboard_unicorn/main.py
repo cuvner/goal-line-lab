@@ -10,6 +10,7 @@
 #   no server     -> an orange corner (the message line says why)
 #
 # Buttons: the two on the left marked with a sun make it brighter/dimmer.
+# Sound: plays GOAL_TUNE on the built-in speaker when a goal is scored.
 
 import time
 
@@ -27,12 +28,34 @@ MESSAGE_ROW = 25          # the commentary scrolls along rows 25-31
 STALE_AFTER = 4.0         # seconds without camera data = camera offline
 brightness = 0.3
 
+# The goal sound: (frequency in Hz, length in seconds) for each note. Change the tune!
+# Middle C = 262, D = 294, E = 330, F = 349, G = 392, A = 440, B = 494, high C = 523
+GOAL_TUNE = [(392, 0.12), (523, 0.12), (659, 0.12), (784, 0.35)]
+GOAL_TUNE_REPEAT = 2.0    # seconds between repeats while GOAL is showing (0 = play once)
+VOLUME = 0.5              # 0 = silent, 1 = loudest
+
 cu = CosmicUnicorn()
 g = PicoGraphics(DISPLAY_COSMIC_UNICORN)
 g.set_font("bitmap6")
 PENS = {0: g.create_pen(0, 0, 0), 1: g.create_pen(0, 255, 0), 2: g.create_pen(255, 180, 0),
         3: g.create_pen(255, 0, 0), 4: g.create_pen(0, 0, 255), 5: g.create_pen(255, 255, 255)}
 cu.set_brightness(brightness)
+cu.set_volume(VOLUME)
+channel = cu.synth_channel(0)
+channel.configure(waveforms=channel.TRIANGLE | channel.SQUARE, attack=0.01, decay=0.05,
+                  sustain=0.8, release=0.1, volume=1.0)
+
+
+def play_tune(tune):
+    """Play a list of (frequency, seconds) notes on the speaker."""
+    cu.play_synth()
+    for frequency, seconds in tune:
+        channel.frequency(frequency)
+        channel.trigger_attack()
+        time.sleep(seconds)
+        channel.trigger_release()
+        time.sleep(0.03)
+    cu.stop_playing()
 
 
 def show(grid, message="", offset=0):
@@ -57,9 +80,41 @@ def buttons():
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         brightness = min(1.0, brightness + 0.05)
         cu.set_brightness(brightness)
+cu.set_volume(VOLUME)
+channel = cu.synth_channel(0)
+channel.configure(waveforms=channel.TRIANGLE | channel.SQUARE, attack=0.01, decay=0.05,
+                  sustain=0.8, release=0.1, volume=1.0)
+
+
+def play_tune(tune):
+    """Play a list of (frequency, seconds) notes on the speaker."""
+    cu.play_synth()
+    for frequency, seconds in tune:
+        channel.frequency(frequency)
+        channel.trigger_attack()
+        time.sleep(seconds)
+        channel.trigger_release()
+        time.sleep(0.03)
+    cu.stop_playing()
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         brightness = max(0.05, brightness - 0.05)
         cu.set_brightness(brightness)
+cu.set_volume(VOLUME)
+channel = cu.synth_channel(0)
+channel.configure(waveforms=channel.TRIANGLE | channel.SQUARE, attack=0.01, decay=0.05,
+                  sustain=0.8, release=0.1, volume=1.0)
+
+
+def play_tune(tune):
+    """Play a list of (frequency, seconds) notes on the speaker."""
+    cu.play_synth()
+    for frequency, seconds in tune:
+        channel.frequency(frequency)
+        channel.trigger_attack()
+        time.sleep(seconds)
+        channel.trigger_release()
+        time.sleep(0.03)
+    cu.stop_playing()
 
 
 def blank_grid():
@@ -197,6 +252,7 @@ last_problem = None
 info = None
 age = None
 fails = 0
+next_tune_at = None
 while True:
     tick += 1
     buttons()
@@ -250,5 +306,9 @@ while True:
     if decision != last_decision:
         print("now showing:", decision, "| score:", info.get("score") if info else "-")
         last_decision = decision
+        next_tune_at = time.ticks_ms() if decision == "GOAL" else None
     show(grid, message, offset)
+    if next_tune_at is not None and time.ticks_diff(time.ticks_ms(), next_tune_at) >= 0:
+        play_tune(GOAL_TUNE)
+        next_tune_at = time.ticks_add(time.ticks_ms(), int(GOAL_TUNE_REPEAT * 1000)) if GOAL_TUNE_REPEAT else None
     time.sleep(0.2 if info is not None else 1)
