@@ -31,7 +31,7 @@ brightness = 0.3
 # The goal sound: (frequency in Hz, length in seconds) for each note. Change the tune!
 # Middle C = 262, D = 294, E = 330, F = 349, G = 392, A = 440, B = 494, high C = 523
 GOAL_TUNE = [(392, 0.12), (523, 0.12), (659, 0.12), (784, 0.35)]
-GOAL_TUNE_REPEAT = 2.0    # seconds between repeats while GOAL is showing (0 = play once)
+GOAL_TUNE_REPEAT = 0      # 0 = play once per goal; e.g. 2.0 = repeat every 2 s while GOAL is showing
 VOLUME = 0.5              # 0 = silent, 1 = loudest
 
 cu = CosmicUnicorn()

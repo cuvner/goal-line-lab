@@ -70,6 +70,6 @@ Set `TEST_MODE = False`. Now the Pico asks the Referee for the decision and the 
 - Draw an exclamation mark `!` (it only needs 1 column wide) and add it after the L.
 
 ## More to try
-- **Cosmic Unicorn only:** it plays a fanfare on its speaker when a goal is scored. The notes are in `GOAL_TUNE` near the top of `main.py` as `(frequency, seconds)` pairs — write your own tune! `GOAL_TUNE_REPEAT` is how often it repeats while GOAL is showing, and `VOLUME` is 0 to 1.
+- **Cosmic Unicorn only:** it plays a fanfare on its speaker when a goal is scored. The notes are in `GOAL_TUNE` near the top of `main.py` as `(frequency, seconds)` pairs — write your own tune! It plays once per goal; set `GOAL_TUNE_REPEAT` to e.g. `2.0` to repeat it every 2 seconds while GOAL is showing. `VOLUME` is 0 to 1.
 - Move the letters down a row (`top = 1`) to see which looks best.
 - Make `draw_score` show the number in a different colour when the score is 5 or more.
