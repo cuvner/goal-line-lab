@@ -39,6 +39,7 @@ DEVICES_FILE = os.path.join(HERE, "devices.txt")
 
 CHANNEL = re.compile(r"^/data/([A-Za-z0-9_-]{1,32})$")
 MAX_BODY = 4096
+GOAL_SHOW_SECONDS = 3.0  # how long GOAL stays on the dashboard and scoreboard after a goal
 # Who may send to / read from which channel (who_is() decides who's who)
 SEND_ONLY = {"ball": "camera"}
 READ_ONLY = {"referee": "scoreboard"}
@@ -87,7 +88,9 @@ class Referee:
         self.devices_mtime = None
         self.rejected = set()  # (ip, channel) pairs already logged
         self.problem = None  # last problem text, so it's only logged once
-        self.decision = "NO BALL"
+        self.decision = "NO BALL"   # what's shown (GOAL only for GOAL_SHOW_SECONDS)
+        self.raw_decision = "NO BALL"  # what decide() last said (used for scoring)
+        self.goal_time = 0.0
         self.score = 0
         self.commentary = ""
 
@@ -180,12 +183,18 @@ class Referee:
         else:
             try:
                 decision = self.module.decide(seen, x)
-                score = self.module.new_score(self.score, self.decision, decision)
+                score = self.module.new_score(self.score, self.raw_decision, decision)
                 if not isinstance(score, int):
                     raise TypeError(f"new_score gave back {score!r}, but it should be a whole number")
-                if decision != self.decision:
+                if decision != self.raw_decision:
                     self.commentary = self.module.commentary(decision, score)
+                if score > self.score:
+                    self.goal_time = time.time()
                 self.score = score
+                self.raw_decision = decision
+                # Show GOAL for a few seconds, then go back to the score even if the ball stays over the line
+                if decision == "GOAL" and time.time() - self.goal_time > GOAL_SHOW_SECONDS:
+                    decision = "NO GOAL"
                 if self.problem:
                     self.problem = None
                     log_event("referee.py working again")
